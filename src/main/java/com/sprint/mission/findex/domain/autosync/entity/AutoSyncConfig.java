@@ -23,14 +23,14 @@ public class AutoSyncConfig extends BaseUpdatableEntity {
   private IndexInfo indexInfo;
 
   @Column(name = "enabled", nullable = false)
-  private Boolean enabled = false;
+  private boolean enabled = false;
 
   public AutoSyncConfig(IndexInfo indexInfo) {
     this.indexInfo = indexInfo;
     this.enabled = false;
   }
 
-  public void updateEnabled(Boolean enabled) {
+  public void updateEnabled(boolean enabled) {
     this.enabled = enabled;
   }
 }
