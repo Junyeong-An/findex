@@ -91,16 +91,15 @@ public class IndexData extends BaseUpdatableEntity {
       BigDecimal highPrice, BigDecimal lowPrice,
       BigDecimal versus, BigDecimal fluctuationRate,
       Long tradingQuantity, BigDecimal tradingPrice,
-      BigDecimal marketTotalAmount, SourceType sourceType) {
-    this.marketPrice = marketPrice;
-    this.closingPrice = closingPrice;
-    this.highPrice = highPrice;
-    this.lowPrice = lowPrice;
-    this.versus = versus;
-    this.fluctuationRate = fluctuationRate;
-    this.tradingQuantity = tradingQuantity;
-    this.tradingPrice = tradingPrice;
-    this.marketTotalAmount = marketTotalAmount;
-    this.sourceType = sourceType;
+      BigDecimal marketTotalAmount) {
+    if (marketPrice != null) this.marketPrice = marketPrice;
+    if (closingPrice != null) this.closingPrice = closingPrice;
+    if (highPrice != null) this.highPrice = highPrice;
+    if (lowPrice != null) this.lowPrice = lowPrice;
+    if (versus != null) this.versus = versus;
+    if (fluctuationRate != null) this.fluctuationRate = fluctuationRate;
+    if (tradingQuantity != null) this.tradingQuantity = tradingQuantity;
+    if (tradingPrice != null) this.tradingPrice = tradingPrice;
+    if (marketTotalAmount != null) this.marketTotalAmount = marketTotalAmount;
   }
 }
