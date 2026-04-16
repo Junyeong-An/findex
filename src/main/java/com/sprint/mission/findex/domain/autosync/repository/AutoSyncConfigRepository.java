@@ -23,7 +23,7 @@ public interface AutoSyncConfigRepository extends JpaRepository<AutoSyncConfig, 
   @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo WHERE a.id = :id")
   Optional<AutoSyncConfig> findByIdWithIndexInfo(@Param("id") UUID id);
 
-  // GET 목록 조회 - 커서 기반 페이지네이션 (필터링 + 동적 정렬)
+  // GET 목록 조회 - ID 기준 커서 기반 페이지네이션
   @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo " +
       "WHERE (:idAfter IS NULL OR a.id > :idAfter) " +
       "AND (:indexInfoId IS NULL OR a.indexInfo.id = :indexInfoId) " +

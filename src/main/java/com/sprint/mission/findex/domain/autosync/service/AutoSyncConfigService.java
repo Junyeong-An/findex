@@ -39,20 +39,13 @@ public class AutoSyncConfigService {
       UUID cursor,
       UUID indexInfoId,
       Boolean enabled,
-      String sortField,
-      String sortDirection,
       int size
   ) {
     // idAfter 우선, 없으면 cursor UUID를 사용
     UUID effectiveIdAfter = idAfter != null ? idAfter : cursor;
 
-    Sort sort = Sort.by(
-        "desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
-        sortField
-    );
-
     Slice<AutoSyncConfig> slice = autoSyncConfigRepository.findAllWithCursor(
-        effectiveIdAfter, indexInfoId, enabled, PageRequest.of(0, size, sort)
+        effectiveIdAfter, indexInfoId, enabled, PageRequest.of(0, size, Sort.by(Sort.Direction.ASC, "id"))
     );
     Slice<AutoSyncConfigResponse> responsePage = slice.map(autoSyncConfigMapper::toResponse);
     long totalElements = autoSyncConfigRepository.countWithFilters(indexInfoId, enabled);

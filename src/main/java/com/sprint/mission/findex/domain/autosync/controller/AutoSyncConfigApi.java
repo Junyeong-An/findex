@@ -28,8 +28,6 @@ public interface AutoSyncConfigApi {
       @Parameter(description = "커서 UUID") @RequestParam(required = false) UUID cursor,
       @Parameter(description = "지수 정보 ID 필터") @RequestParam(required = false) UUID indexInfoId,
       @Parameter(description = "활성화 여부 필터") @RequestParam(required = false) Boolean enabled,
-      @Parameter(description = "정렬 기준 필드") @RequestParam(defaultValue = "indexInfo.indexName") String sortField,
-      @Parameter(description = "정렬 방향 (asc/desc)") @RequestParam(defaultValue = "asc") String sortDirection,
       @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size
   );
 }
