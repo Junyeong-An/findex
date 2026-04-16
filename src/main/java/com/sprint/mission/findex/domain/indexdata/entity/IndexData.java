@@ -1,7 +1,7 @@
 package com.sprint.mission.findex.domain.indexdata.entity;
 
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
-import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo.SourceType;
+import com.sprint.mission.findex.domain.indexinfo.entity.SourceType;
 import com.sprint.mission.findex.global.common.entity.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
