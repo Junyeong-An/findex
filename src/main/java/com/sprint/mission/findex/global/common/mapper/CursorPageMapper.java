@@ -21,11 +21,10 @@ public class CursorPageMapper {
       Long totalElements
   ) {
     List<T> content = slice.getContent();
-    String nextCursor = null;
+    UUID nextCursor = null;
 
     if (slice.hasNext() && !content.isEmpty()) {
-      UUID lastId = cursorExtractor.apply(content.get(content.size() - 1));
-      nextCursor = lastId != null ? lastId.toString() : null;
+      nextCursor = cursorExtractor.apply(content.get(content.size() - 1));
     }
 
     return new CursorPageResponse<>(
@@ -43,11 +42,10 @@ public class CursorPageMapper {
       Function<T, UUID> cursorExtractor
   ) {
     List<T> content = page.getContent();
-    String nextCursor = null;
+    UUID nextCursor = null;
 
     if (page.hasNext() && !content.isEmpty()) {
-      UUID lastId = cursorExtractor.apply(content.get(content.size() - 1));
-      nextCursor = lastId != null ? lastId.toString() : null;
+      nextCursor = cursorExtractor.apply(content.get(content.size() - 1));
     }
 
     return new CursorPageResponse<>(
