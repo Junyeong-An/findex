@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +30,8 @@ public class IndexInfo extends BaseUpdatableEntity {
   @Column(name = "employed_items_count", nullable = false)
   private Integer employedItemsCount;
 
-  @Column(name = "base_point_in_time", nullable = false, length = 50)
-  private String basePointInTime;
+  @Column(name = "base_point_in_time", nullable = false)
+  private LocalDate basePointInTime;
 
   @Column(name = "base_index", nullable = false, precision = 20, scale = 4)
   private BigDecimal baseIndex;
@@ -39,16 +40,11 @@ public class IndexInfo extends BaseUpdatableEntity {
   @Column(name = "source_type", nullable = false, length = 10)
   private SourceType sourceType;
 
-  public enum SourceType {
-    USER,
-    OPEN_API
-  }
-
   @Column(name = "favorite", nullable = false)
   private Boolean favorite = false;
 
   public IndexInfo(String indexClassification, String indexName, Integer employedItemsCount,
-      String basePointInTime, BigDecimal baseIndex, SourceType sourceType, Boolean favorite) {
+      LocalDate basePointInTime, BigDecimal baseIndex, SourceType sourceType, Boolean favorite) {
     this.indexClassification = indexClassification;
     this.indexName = indexName;
     this.employedItemsCount = employedItemsCount;
@@ -56,5 +52,13 @@ public class IndexInfo extends BaseUpdatableEntity {
     this.baseIndex = baseIndex;
     this.sourceType = sourceType;
     this.favorite = favorite;
+  }
+
+  public void update(Integer employedItemsCount, LocalDate basePointInTime, BigDecimal baseIndex,
+      Boolean favorite) {
+    if (employedItemsCount != null) this.employedItemsCount = employedItemsCount;
+    if (basePointInTime != null) this.basePointInTime = basePointInTime;
+    if (baseIndex != null) this.baseIndex = baseIndex;
+    if (favorite != null) this.favorite = favorite;
   }
 }
