@@ -25,7 +25,7 @@ public interface AutoSyncConfigApi {
   @Operation(summary = "자동 연동 설정 목록 조회")
   ResponseEntity<CursorPageResponse<AutoSyncConfigResponse>> findAll(
       @Parameter(description = "마지막 조회 ID (커서)") @RequestParam(required = false) UUID idAfter,
-      @Parameter(description = "커서 (문자열)") @RequestParam(required = false) String cursor,
+      @Parameter(description = "커서 UUID") @RequestParam(required = false) UUID cursor,
       @Parameter(description = "지수 정보 ID 필터") @RequestParam(required = false) UUID indexInfoId,
       @Parameter(description = "활성화 여부 필터") @RequestParam(required = false) Boolean enabled,
       @Parameter(description = "정렬 기준 필드") @RequestParam(defaultValue = "indexInfo.indexName") String sortField,

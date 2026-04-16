@@ -34,22 +34,15 @@ public class AutoSyncConfigService {
   @Transactional(readOnly = true)
   public CursorPageResponse<AutoSyncConfigResponse> findAll(
       UUID idAfter,
-      String cursor,
+      UUID cursor,
       UUID indexInfoId,
       Boolean enabled,
       String sortField,
       String sortDirection,
       int size
   ) {
-    // idAfter 우선, 없으면 cursor(String)를 UUID로 파싱해서 사용
-    UUID effectiveIdAfter = idAfter;
-    if (effectiveIdAfter == null && cursor != null) {
-      try {
-        effectiveIdAfter = UUID.fromString(cursor);
-      } catch (IllegalArgumentException ignored) {
-        // 유효하지 않은 cursor 값이면 무시
-      }
-    }
+    // idAfter 우선, 없으면 cursor UUID를 사용
+    UUID effectiveIdAfter = idAfter != null ? idAfter : cursor;
 
     Sort sort = Sort.by(
         "desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,

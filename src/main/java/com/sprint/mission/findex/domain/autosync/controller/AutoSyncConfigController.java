@@ -36,7 +36,7 @@ public class AutoSyncConfigController implements AutoSyncConfigApi {
   @GetMapping
   public ResponseEntity<CursorPageResponse<AutoSyncConfigResponse>> findAll(
       @RequestParam(required = false) UUID idAfter,
-      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) UUID cursor,
       @RequestParam(required = false) UUID indexInfoId,
       @RequestParam(required = false) Boolean enabled,
       @RequestParam(defaultValue = "indexInfo.indexName") String sortField,

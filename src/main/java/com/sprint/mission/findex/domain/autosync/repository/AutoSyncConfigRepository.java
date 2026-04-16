@@ -44,7 +44,7 @@ public interface AutoSyncConfigRepository extends JpaRepository<AutoSyncConfig, 
       @Param("enabled") Boolean enabled
   );
 
-  // 배치(Spring Scheduler)에서 활성화된 지수 목록 전체 조회
-  @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo WHERE a.enabled = true")
-  List<AutoSyncConfig> findAllByEnabledTrue();
+  // 배치(Spring Scheduler) 등에서 enabled 조건에 맞는 지수 목록 전체 조회
+  @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo WHERE a.enabled = :enabled")
+  List<AutoSyncConfig> findAllByEnabled(@Param("enabled") boolean enabled);
 }
