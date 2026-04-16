@@ -1,6 +1,5 @@
 package com.sprint.mission.findex.domain.autosync.dto;
 
-import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
 import java.util.UUID;
 
 public record AutoSyncConfigResponse(
@@ -11,13 +10,4 @@ public record AutoSyncConfigResponse(
     boolean enabled
 ) {
 
-  public static AutoSyncConfigResponse from(AutoSyncConfig config) {
-    return new AutoSyncConfigResponse(
-        config.getId(),
-        config.getIndexInfo().getId(),
-        config.getIndexInfo().getIndexClassification(),
-        config.getIndexInfo().getIndexName(),
-        config.isEnabled()
-    );
-  }
 }

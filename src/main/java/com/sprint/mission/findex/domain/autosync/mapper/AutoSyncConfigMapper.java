@@ -8,8 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AutoSyncConfigMapper {
 
-  @Mapping(target = "indexInfoId", expression = "java(autoSyncConfig.getIndexInfo().getId())")
-  @Mapping(target = "indexClassification", expression = "java(autoSyncConfig.getIndexInfo().getIndexClassification())")
-  @Mapping(target = "indexName", expression = "java(autoSyncConfig.getIndexInfo().getIndexName())")
-  AutoSyncConfigResponse toResponse(AutoSyncConfig autoSyncConfig);
+  @Mapping(source = "indexInfo.id", target = "indexInfoId")
+  @Mapping(source = "indexInfo.indexClassification", target = "indexClassification")
+  @Mapping(source = "indexInfo.indexName", target = "indexName")
+  AutoSyncConfigResponse toResponse(AutoSyncConfig config);
 }
