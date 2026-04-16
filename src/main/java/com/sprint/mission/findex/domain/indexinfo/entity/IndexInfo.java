@@ -30,7 +30,7 @@ public class IndexInfo extends BaseUpdatableEntity {
   @Column(name = "employed_items_count", nullable = false)
   private Integer employedItemsCount;
 
-  @Column(name = "base_point_in_time", nullable = false, length = 50)
+  @Column(name = "base_point_in_time", nullable = false)
   private LocalDate basePointInTime;
 
   @Column(name = "base_index", nullable = false, precision = 20, scale = 4)
