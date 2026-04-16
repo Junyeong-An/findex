@@ -1,6 +1,7 @@
 package com.sprint.mission.findex.domain.indexdata.dto;
 
 import com.sprint.mission.findex.domain.indexinfo.entity.SourceType;
+import com.sprint.mission.findex.domain.indexdata.entity.IndexData;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
