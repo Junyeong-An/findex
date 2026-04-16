@@ -3,6 +3,7 @@ package com.sprint.mission.findex.domain.autosync.service;
 import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigResponse;
 import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigUpdateRequest;
 import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosync.mapper.AutoSyncConfigMapper;
 import com.sprint.mission.findex.domain.autosync.repository.AutoSyncConfigRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.common.mapper.CursorPageMapper;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AutoSyncConfigService {
 
+  private final AutoSyncConfigMapper autoSyncConfigMapper;
   private final AutoSyncConfigRepository autoSyncConfigRepository;
   private final CursorPageMapper cursorPageMapper;
 
@@ -28,7 +30,7 @@ public class AutoSyncConfigService {
     AutoSyncConfig config = autoSyncConfigRepository.findByIdWithIndexInfo(id)
         .orElseThrow(() -> new ApiException(ERROR.AUTO_SYNC_CONFIG_NOT_FOUND));
     config.updateEnabled(request.enabled());
-    return AutoSyncConfigResponse.from(config);
+    return autoSyncConfigMapper.toResponse(config);
   }
 
   @Transactional(readOnly = true)
@@ -52,7 +54,7 @@ public class AutoSyncConfigService {
     Slice<AutoSyncConfig> slice = autoSyncConfigRepository.findAllWithCursor(
         effectiveIdAfter, indexInfoId, enabled, PageRequest.of(0, size, sort)
     );
-    Slice<AutoSyncConfigResponse> responsePage = slice.map(AutoSyncConfigResponse::from);
+    Slice<AutoSyncConfigResponse> responsePage = slice.map(autoSyncConfigMapper::toResponse);
     long totalElements = autoSyncConfigRepository.countWithFilters(indexInfoId, enabled);
     return cursorPageMapper.fromSlice(responsePage, AutoSyncConfigResponse::id, totalElements);
   }
