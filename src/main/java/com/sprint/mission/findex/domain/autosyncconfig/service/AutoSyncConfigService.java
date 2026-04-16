@@ -11,8 +11,8 @@ import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,13 +48,13 @@ public class AutoSyncConfigService {
     UUID effectiveIdAfter = idAfter != null ? idAfter : cursor;
     int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
 
-    Slice<AutoSyncConfig> slice = autoSyncConfigRepository.findAllWithCursor(
+    Page<AutoSyncConfig> page = autoSyncConfigRepository.findAllWithCursor(
         effectiveIdAfter,
         indexInfoId,
         enabled,
         PageRequest.of(0, validatedSize, Sort.by(Sort.Direction.ASC, "id"))
     );
-    Slice<AutoSyncConfigResponse> responsePage = slice.map(autoSyncConfigMapper::toResponse);
-    return cursorPageMapper.fromSlice(responsePage, AutoSyncConfigResponse::id);
+    Page<AutoSyncConfigResponse> responsePage = page.map(autoSyncConfigMapper::toResponse);
+    return cursorPageMapper.fromPage(responsePage, AutoSyncConfigResponse::id);
   }
 }
