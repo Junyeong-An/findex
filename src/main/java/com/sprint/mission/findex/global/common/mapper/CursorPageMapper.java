@@ -11,14 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class CursorPageMapper {
 
-  /**
-   * Slice 기반 매핑. Slice는 count query를 수행하지 않으므로
-   * totalElements를 별도 count 쿼리로 계산하여 전달해야 합니다.
-   */
   public <T> CursorPageResponse<T> fromSlice(
       Slice<T> slice,
-      Function<T, UUID> cursorExtractor,
-      Long totalElements
+      Function<T, UUID> cursorExtractor
   ) {
     List<T> content = slice.getContent();
     UUID nextCursor = null;
@@ -32,7 +27,7 @@ public class CursorPageMapper {
         nextCursor,
         nextCursor,
         slice.getSize(),
-        totalElements,
+        null,
         slice.hasNext()
     );
   }

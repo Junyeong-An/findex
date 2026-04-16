@@ -55,7 +55,6 @@ public class AutoSyncConfigService {
         PageRequest.of(0, validatedSize, Sort.by(Sort.Direction.ASC, "id"))
     );
     Slice<AutoSyncConfigResponse> responsePage = slice.map(autoSyncConfigMapper::toResponse);
-    long totalElements = autoSyncConfigRepository.countWithFilters(indexInfoId, enabled);
-    return cursorPageMapper.fromSlice(responsePage, AutoSyncConfigResponse::id, totalElements);
+    return cursorPageMapper.fromSlice(responsePage, AutoSyncConfigResponse::id);
   }
 }
