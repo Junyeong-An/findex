@@ -4,6 +4,7 @@ import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigResponse;
 import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigUpdateRequest;
 import com.sprint.mission.findex.domain.autosync.service.AutoSyncConfigService;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class AutoSyncConfigController implements AutoSyncConfigApi {
   @PatchMapping("/{id}")
   public ResponseEntity<AutoSyncConfigResponse> updateEnabled(
       @PathVariable UUID id,
-      @RequestBody AutoSyncConfigUpdateRequest request
+      @RequestBody @Valid AutoSyncConfigUpdateRequest request
   ) {
     return ResponseEntity.ok(autoSyncConfigService.updateEnabled(id, request));
   }

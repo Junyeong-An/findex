@@ -1,7 +1,6 @@
 package com.sprint.mission.findex.domain.autosync.dto;
 
 import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
-import java.time.Instant;
 import java.util.UUID;
 
 public record AutoSyncConfigResponse(
@@ -9,9 +8,7 @@ public record AutoSyncConfigResponse(
     UUID indexInfoId,
     String indexClassification,
     String indexName,
-    boolean enabled,
-    Instant createdAt,
-    Instant updatedAt
+    boolean enabled
 ) {
 
   public static AutoSyncConfigResponse from(AutoSyncConfig config) {
@@ -20,9 +17,7 @@ public record AutoSyncConfigResponse(
         config.getIndexInfo().getId(),
         config.getIndexInfo().getIndexClassification(),
         config.getIndexInfo().getIndexName(),
-        config.isEnabled(),
-        config.getCreatedAt(),
-        config.getUpdatedAt()
+        config.isEnabled()
     );
   }
 }
