@@ -21,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AutoSyncConfigService {
 
+  private static final int MIN_PAGE_SIZE = 1;
+  private static final int MAX_PAGE_SIZE = 100;
+
   private final AutoSyncConfigMapper autoSyncConfigMapper;
   private final AutoSyncConfigRepository autoSyncConfigRepository;
   private final CursorPageMapper cursorPageMapper;
@@ -43,9 +46,13 @@ public class AutoSyncConfigService {
   ) {
     // idAfter 우선, 없으면 cursor UUID를 사용
     UUID effectiveIdAfter = idAfter != null ? idAfter : cursor;
+    int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
 
     Slice<AutoSyncConfig> slice = autoSyncConfigRepository.findAllWithCursor(
-        effectiveIdAfter, indexInfoId, enabled, PageRequest.of(0, size, Sort.by(Sort.Direction.ASC, "id"))
+        effectiveIdAfter,
+        indexInfoId,
+        enabled,
+        PageRequest.of(0, validatedSize, Sort.by(Sort.Direction.ASC, "id"))
     );
     Slice<AutoSyncConfigResponse> responsePage = slice.map(autoSyncConfigMapper::toResponse);
     long totalElements = autoSyncConfigRepository.countWithFilters(indexInfoId, enabled);
