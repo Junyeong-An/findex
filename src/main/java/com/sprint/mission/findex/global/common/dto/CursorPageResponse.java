@@ -1,12 +1,11 @@
 package com.sprint.mission.findex.global.common.dto;
 
 import java.util.List;
-import java.util.UUID;
 
 public record CursorPageResponse<T>(
     List<T> content,
-    UUID nextCursor,
-    UUID nextIdAfter,
+    String nextCursor,
+    String nextIdAfter,
     int size,
     Long totalElements,
     boolean hasNext
@@ -14,8 +13,8 @@ public record CursorPageResponse<T>(
 
   public static <T> CursorPageResponse<T> of(
       List<T> content,
-      UUID nextCursor,
-      UUID nextIdAfter,
+      String nextCursor,
+      String nextIdAfter,
       int size,
       Long totalElements,
       boolean hasNext

@@ -35,6 +35,15 @@ public interface AutoSyncConfigRepository extends JpaRepository<AutoSyncConfig, 
       Pageable pageable
   );
 
+  // GET 목록 조회 - totalElements 계산용 (필터링 조건 일치, 커서는 제외)
+  @Query("SELECT COUNT(a) FROM AutoSyncConfig a " +
+      "WHERE (:indexInfoId IS NULL OR a.indexInfo.id = :indexInfoId) " +
+      "AND (:enabled IS NULL OR a.enabled = :enabled)")
+  long countWithFilters(
+      @Param("indexInfoId") UUID indexInfoId,
+      @Param("enabled") Boolean enabled
+  );
+
   // 배치(Spring Scheduler)에서 활성화된 지수 목록 전체 조회
   @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo WHERE a.enabled = true")
   List<AutoSyncConfig> findAllByEnabledTrue();

@@ -60,6 +60,7 @@ public class AutoSyncConfigService {
         effectiveIdAfter, indexInfoId, enabled, PageRequest.of(0, size, sort)
     );
     Slice<AutoSyncConfigResponse> responsePage = slice.map(AutoSyncConfigResponse::from);
-    return cursorPageMapper.fromSlice(responsePage, AutoSyncConfigResponse::id);
+    long totalElements = autoSyncConfigRepository.countWithFilters(indexInfoId, enabled);
+    return cursorPageMapper.fromSlice(responsePage, AutoSyncConfigResponse::id, totalElements);
   }
 }

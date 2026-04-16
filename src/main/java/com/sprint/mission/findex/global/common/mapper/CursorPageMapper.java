@@ -11,15 +11,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class CursorPageMapper {
 
+  /**
+   * Slice 기반 매핑. Slice는 count query를 수행하지 않으므로
+   * totalElements를 별도 count 쿼리로 계산하여 전달해야 합니다.
+   */
   public <T> CursorPageResponse<T> fromSlice(
       Slice<T> slice,
-      Function<T, UUID> cursor
+      Function<T, UUID> cursorExtractor,
+      Long totalElements
   ) {
     List<T> content = slice.getContent();
-    UUID nextCursor = null;
+    String nextCursor = null;
 
     if (slice.hasNext() && !content.isEmpty()) {
-      nextCursor = cursor.apply(content.get(content.size() - 1));
+      UUID lastId = cursorExtractor.apply(content.get(content.size() - 1));
+      nextCursor = lastId != null ? lastId.toString() : null;
     }
 
     return new CursorPageResponse<>(
@@ -27,20 +33,21 @@ public class CursorPageMapper {
         nextCursor,
         nextCursor,
         slice.getSize(),
-        null,
+        totalElements,
         slice.hasNext()
     );
   }
 
   public <T> CursorPageResponse<T> fromPage(
       Page<T> page,
-      Function<T, UUID> cursor
+      Function<T, UUID> cursorExtractor
   ) {
     List<T> content = page.getContent();
-    UUID nextCursor = null;
+    String nextCursor = null;
 
     if (page.hasNext() && !content.isEmpty()) {
-      nextCursor = cursor.apply(content.get(content.size() - 1));
+      UUID lastId = cursorExtractor.apply(content.get(content.size() - 1));
+      nextCursor = lastId != null ? lastId.toString() : null;
     }
 
     return new CursorPageResponse<>(
