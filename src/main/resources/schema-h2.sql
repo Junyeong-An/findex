@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS index_info (
     index_classification VARCHAR(240) NOT NULL,
     index_name           VARCHAR(240) NOT NULL,
     employed_items_count INTEGER      NOT NULL,
-    base_point_in_time   VARCHAR(50)  NOT NULL,
+    base_point_in_time   DATE         NOT NULL,
     base_index           NUMERIC(20, 4) NOT NULL,
     source_type          VARCHAR(10)  NOT NULL CHECK (source_type IN ('USER', 'OPEN_API')),
     favorite             BOOLEAN      NOT NULL DEFAULT FALSE,
