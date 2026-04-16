@@ -1,10 +1,10 @@
-package com.sprint.mission.findex.domain.autosync.service;
+package com.sprint.mission.findex.domain.autosyncconfig.service;
 
-import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigResponse;
-import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigUpdateRequest;
-import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
-import com.sprint.mission.findex.domain.autosync.mapper.AutoSyncConfigMapper;
-import com.sprint.mission.findex.domain.autosync.repository.AutoSyncConfigRepository;
+import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigResponse;
+import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigUpdateRequest;
+import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.mapper.AutoSyncConfigMapper;
+import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.common.mapper.CursorPageMapper;
 import com.sprint.mission.findex.global.exception.ApiException;

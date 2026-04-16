@@ -3,8 +3,8 @@ package com.sprint.mission.findex.domain.indexinfo.service;
 import static com.sprint.mission.findex.global.exception.ApiException.ERROR.INDEX_INFO_DUPLICATED;
 import static com.sprint.mission.findex.global.exception.ApiException.ERROR.INDEX_INFO_NOT_FOUND;
 
-import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
-import com.sprint.mission.findex.domain.autosync.repository.AutoSyncConfigRepository;
+import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoCreateRequest;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoUpdateRequest;

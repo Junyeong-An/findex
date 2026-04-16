@@ -1,6 +1,6 @@
-package com.sprint.mission.findex.domain.autosync.repository;
+package com.sprint.mission.findex.domain.autosyncconfig.repository;
 
-import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import java.util.List;
 import java.util.Optional;

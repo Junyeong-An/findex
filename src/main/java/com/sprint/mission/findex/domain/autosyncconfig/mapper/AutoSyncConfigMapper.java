@@ -1,7 +1,7 @@
-package com.sprint.mission.findex.domain.autosync.mapper;
+package com.sprint.mission.findex.domain.autosyncconfig.mapper;
 
-import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigResponse;
-import com.sprint.mission.findex.domain.autosync.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigResponse;
+import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

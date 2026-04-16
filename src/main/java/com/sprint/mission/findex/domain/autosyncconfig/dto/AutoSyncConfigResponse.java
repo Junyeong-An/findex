@@ -1,4 +1,4 @@
-package com.sprint.mission.findex.domain.autosync.dto;
+package com.sprint.mission.findex.domain.autosyncconfig.dto;
 
 import java.util.UUID;
 

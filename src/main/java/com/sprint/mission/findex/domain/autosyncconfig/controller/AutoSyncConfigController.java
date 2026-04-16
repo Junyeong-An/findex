@@ -1,8 +1,8 @@
-package com.sprint.mission.findex.domain.autosync.controller;
+package com.sprint.mission.findex.domain.autosyncconfig.controller;
 
-import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigResponse;
-import com.sprint.mission.findex.domain.autosync.dto.AutoSyncConfigUpdateRequest;
-import com.sprint.mission.findex.domain.autosync.service.AutoSyncConfigService;
+import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigResponse;
+import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigUpdateRequest;
+import com.sprint.mission.findex.domain.autosyncconfig.service.AutoSyncConfigService;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import jakarta.validation.Valid;
 import java.util.UUID;
