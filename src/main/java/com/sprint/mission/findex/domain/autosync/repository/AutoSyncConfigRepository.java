@@ -5,7 +5,11 @@ import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AutoSyncConfigRepository extends JpaRepository<AutoSyncConfig, UUID> {
 
@@ -15,6 +19,23 @@ public interface AutoSyncConfigRepository extends JpaRepository<AutoSyncConfig, 
   // 설정 조회 (단건) - PATCH API, 배치에서 활용
   Optional<AutoSyncConfig> findByIndexInfo(IndexInfo indexInfo);
 
+  // PATCH API - IndexInfo 함께 로딩 (N+1 방지)
+  @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo WHERE a.id = :id")
+  Optional<AutoSyncConfig> findByIdWithIndexInfo(@Param("id") UUID id);
+
+  // GET 목록 조회 - 커서 기반 페이지네이션 (필터링 + 동적 정렬)
+  @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo " +
+      "WHERE (:idAfter IS NULL OR a.id > :idAfter) " +
+      "AND (:indexInfoId IS NULL OR a.indexInfo.id = :indexInfoId) " +
+      "AND (:enabled IS NULL OR a.enabled = :enabled)")
+  Slice<AutoSyncConfig> findAllWithCursor(
+      @Param("idAfter") UUID idAfter,
+      @Param("indexInfoId") UUID indexInfoId,
+      @Param("enabled") Boolean enabled,
+      Pageable pageable
+  );
+
   // 배치(Spring Scheduler)에서 활성화된 지수 목록 전체 조회
+  @Query("SELECT a FROM AutoSyncConfig a JOIN FETCH a.indexInfo WHERE a.enabled = true")
   List<AutoSyncConfig> findAllByEnabledTrue();
 }
