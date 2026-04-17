@@ -61,7 +61,7 @@ public class AutoSyncConfigRepositoryImpl implements AutoSyncConfigRepositoryCus
           ? autoSyncConfig.indexInfo.indexName.gt(cursor)
               .or(autoSyncConfig.indexInfo.indexName.eq(cursor).and(autoSyncConfig.id.gt(idAfter)))
           : autoSyncConfig.indexInfo.indexName.lt(cursor)
-              .or(autoSyncConfig.indexInfo.indexName.eq(cursor).and(autoSyncConfig.id.lt(idAfter)));
+              .or(autoSyncConfig.indexInfo.indexName.eq(cursor).and(autoSyncConfig.id.gt(idAfter)));
       case "enabled" -> buildEnabledCursorCondition(cursor, idAfter, asc);
       default -> asc
           ? autoSyncConfig.id.gt(idAfter)
@@ -80,7 +80,7 @@ public class AutoSyncConfigRepositoryImpl implements AutoSyncConfigRepositoryCus
     } else {
       // cursor가 true면 enabled=false인 행도 포함
       BooleanExpression lessThan = cursorBool ? autoSyncConfig.enabled.isFalse() : null;
-      BooleanExpression sameWithTiebreak = sameField.and(autoSyncConfig.id.lt(idAfter));
+      BooleanExpression sameWithTiebreak = sameField.and(autoSyncConfig.id.gt(idAfter));
       return lessThan != null ? lessThan.or(sameWithTiebreak) : sameWithTiebreak;
     }
   }
