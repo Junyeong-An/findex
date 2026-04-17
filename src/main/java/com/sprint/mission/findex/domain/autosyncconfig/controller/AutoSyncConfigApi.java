@@ -22,12 +22,14 @@ public interface AutoSyncConfigApi {
       @RequestBody @Valid AutoSyncConfigUpdateRequest request
   );
 
-  @Operation(summary = "자동 연동 설정 목록 조회", description = "자동 연동 설정 목록을 조회합니다. 필터링, 커서 기반 페이지네이션을 지원합니다.")
+  @Operation(summary = "자동 연동 설정 목록 조회", description = "자동 연동 설정 목록을 조회합니다. 필터링, 정렬, 커서 기반 페이지네이션을 지원합니다.")
   ResponseEntity<CursorPageResponse<AutoSyncConfigResponse>> findAll(
-      @Parameter(description = "마지막 조회 ID (커서)") @RequestParam(required = false) UUID idAfter,
-      @Parameter(description = "커서 UUID") @RequestParam(required = false) UUID cursor,
+      @Parameter(description = "마지막 요소 UUID (tiebreaker)") @RequestParam(required = false) UUID idAfter,
+      @Parameter(description = "커서 (정렬 필드의 마지막 값)") @RequestParam(required = false) String cursor,
       @Parameter(description = "지수 정보 ID 필터") @RequestParam(required = false) UUID indexInfoId,
       @Parameter(description = "활성화 여부 필터") @RequestParam(required = false) Boolean enabled,
+      @Parameter(description = "정렬 필드 (indexInfo.indexName, enabled)") @RequestParam(defaultValue = "indexInfo.indexName") String sortField,
+      @Parameter(description = "정렬 방향 (asc, desc)") @RequestParam(defaultValue = "asc") String sortDirection,
       @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size
   );
 }

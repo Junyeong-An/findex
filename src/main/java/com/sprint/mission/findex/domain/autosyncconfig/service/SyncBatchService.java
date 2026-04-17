@@ -1,4 +1,4 @@
-package com.sprint.mission.findex.domain.autosyncconfig.batch;
+package com.sprint.mission.findex.domain.autosyncconfig.service;
 
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;

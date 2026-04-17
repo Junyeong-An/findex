@@ -1,6 +1,7 @@
 package com.sprint.mission.findex.domain.autosyncconfig.batch;
 
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.service.SyncBatchService;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.domain.syncclient.client.KrxOpenApiClient;
 import com.sprint.mission.findex.domain.syncclient.dto.IndexDataApiResponse;

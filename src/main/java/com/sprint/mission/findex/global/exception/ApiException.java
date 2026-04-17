@@ -23,6 +23,7 @@ public class ApiException extends RuntimeException {
 
     // AutoSyncConfig
     AUTO_SYNC_CONFIG_NOT_FOUND("AUTO_SYNC_001", "자동 연동 설정을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_SORT_FIELD("AUTO_SYNC_002", "유효하지 않은 정렬 필드입니다.", HttpStatus.BAD_REQUEST),
 
     // Common
     COMMON_INVALID_REQUEST("COMMON_001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
