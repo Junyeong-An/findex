@@ -110,7 +110,7 @@ public class SyncJobServiceImpl implements SyncJobService {
 
     String nextCursor = null;
 
-    if (!content.isEmpty()) {
+    if (hasNext && !content.isEmpty()) {
       SyncJobResponse lastElement = content.get(content.size() - 1);
       nextCursor = lastElement.id().toString();
     }
