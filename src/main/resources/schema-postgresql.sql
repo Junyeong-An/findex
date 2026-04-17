@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS sync_job (
     job_time      TIMESTAMPTZ  NOT NULL,
     result        VARCHAR(10)  NOT NULL CHECK (result IN ('SUCCESS', 'FAILED')),
     error_message TEXT,
-    FOREIGN KEY (index_info_id) REFERENCES index_info (id)
+    FOREIGN KEY (index_info_id) REFERENCES index_info (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS auto_sync_config (
