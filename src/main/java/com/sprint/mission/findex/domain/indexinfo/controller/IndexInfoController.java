@@ -2,16 +2,21 @@ package com.sprint.mission.findex.domain.indexinfo.controller;
 
 import com.sprint.mission.findex.domain.indexinfo.controller.api.IndexInfoApi;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoCreateRequest;
+import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoQueryCondition;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoUpdateRequest;
 import com.sprint.mission.findex.domain.indexinfo.service.IndexInfoService;
+import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,5 +59,13 @@ public class IndexInfoController implements IndexInfoApi {
     indexInfoService.delete(id);
     return ResponseEntity.status(HttpStatus.NO_CONTENT)
         .build();
+  }
+
+  @GetMapping
+  public ResponseEntity<CursorPageResponse<IndexInfoResponse>> getList(
+      @ParameterObject @ModelAttribute @Valid IndexInfoQueryCondition condition) {
+    CursorPageResponse<IndexInfoResponse> list = indexInfoService.getList(condition);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(list);
   }
 }

@@ -6,13 +6,16 @@ import static com.sprint.mission.findex.global.exception.ApiException.ERROR.INDE
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoCreateRequest;
+import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoQueryCondition;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoUpdateRequest;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.domain.indexinfo.entity.SourceType;
 import com.sprint.mission.findex.domain.indexinfo.mapper.IndexInfoMapper;
 import com.sprint.mission.findex.domain.indexinfo.repository.IndexInfoRepository;
+import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -67,6 +70,10 @@ public class IndexInfoService {
   public void delete(UUID id) {
     IndexInfo indexInfo = findByIdOrThrow(id);
     indexInfoRepository.delete(indexInfo);
+  }
+
+  public CursorPageResponse<IndexInfoResponse> getList(IndexInfoQueryCondition condition) {
+    return indexInfoRepository.findIndexInfos(condition);
   }
 
   private IndexInfo create(IndexInfoCreateRequest req, SourceType sourceType) {
