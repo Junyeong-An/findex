@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "자동 연동 설정 API")
 public interface AutoSyncConfigApi {
 
-  @Operation(summary = "자동 연동 설정 활성화 여부 수정")
+  @Operation(summary = "자동 연동 설정 활성화 여부 수정", description = "기존 자동 연동 설정을 수정합니다.")
   ResponseEntity<AutoSyncConfigResponse> updateEnabled(
       @Parameter(description = "자동 연동 설정 ID") @PathVariable UUID id,
       @RequestBody @Valid AutoSyncConfigUpdateRequest request
   );
 
-  @Operation(summary = "자동 연동 설정 목록 조회")
+  @Operation(summary = "자동 연동 설정 목록 조회", description = "자동 연동 설정 목록을 조회합니다. 필터링, 커서 기반 페이지네이션을 지원합니다.")
   ResponseEntity<CursorPageResponse<AutoSyncConfigResponse>> findAll(
       @Parameter(description = "마지막 조회 ID (커서)") @RequestParam(required = false) UUID idAfter,
       @Parameter(description = "커서 UUID") @RequestParam(required = false) UUID cursor,
