@@ -13,13 +13,13 @@ public class CursorPageMapper {
 
   public <T> CursorPageResponse<T> fromSlice(
       Slice<T> slice,
-      Function<T, UUID> cursor
+      Function<T, UUID> cursorExtractor
   ) {
     List<T> content = slice.getContent();
     UUID nextCursor = null;
 
     if (slice.hasNext() && !content.isEmpty()) {
-      nextCursor = cursor.apply(content.get(content.size() - 1));
+      nextCursor = cursorExtractor.apply(content.get(content.size() - 1));
     }
 
     return new CursorPageResponse<>(
@@ -34,13 +34,13 @@ public class CursorPageMapper {
 
   public <T> CursorPageResponse<T> fromPage(
       Page<T> page,
-      Function<T, UUID> cursor
+      Function<T, UUID> cursorExtractor
   ) {
     List<T> content = page.getContent();
     UUID nextCursor = null;
 
     if (page.hasNext() && !content.isEmpty()) {
-      nextCursor = cursor.apply(content.get(content.size() - 1));
+      nextCursor = cursorExtractor.apply(content.get(content.size() - 1));
     }
 
     return new CursorPageResponse<>(

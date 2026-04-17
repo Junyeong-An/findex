@@ -1,6 +1,6 @@
 package com.sprint.mission.findex.domain.indexdata.dto;
 
-import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo.SourceType;
+import com.sprint.mission.findex.domain.indexinfo.entity.SourceType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;

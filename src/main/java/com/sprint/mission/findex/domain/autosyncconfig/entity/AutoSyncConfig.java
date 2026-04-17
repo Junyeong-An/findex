@@ -1,4 +1,4 @@
-package com.sprint.mission.findex.domain.autosync.entity;
+package com.sprint.mission.findex.domain.autosyncconfig.entity;
 
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.global.common.entity.BaseUpdatableEntity;

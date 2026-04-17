@@ -7,7 +7,8 @@ import com.sprint.mission.findex.domain.indexdata.entity.IndexData;
 import com.sprint.mission.findex.domain.indexdata.mapper.IndexDataMapper;
 import com.sprint.mission.findex.domain.indexdata.repository.IndexDataRepository;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
-import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo.SourceType;
+import com.sprint.mission.findex.domain.indexinfo.entity.SourceType;
+
 import com.sprint.mission.findex.domain.indexinfo.repository.IndexInfoRepository;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
