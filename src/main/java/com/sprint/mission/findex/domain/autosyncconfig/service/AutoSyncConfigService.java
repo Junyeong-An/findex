@@ -6,9 +6,9 @@ import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.autosyncconfig.mapper.AutoSyncConfigMapper;
 import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
-import com.sprint.mission.findex.global.common.mapper.CursorPageMapper;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +26,6 @@ public class AutoSyncConfigService {
 
   private final AutoSyncConfigMapper autoSyncConfigMapper;
   private final AutoSyncConfigRepository autoSyncConfigRepository;
-  private final CursorPageMapper cursorPageMapper;
 
   @Transactional
   public AutoSyncConfigResponse updateEnabled(UUID id, AutoSyncConfigUpdateRequest request) {
@@ -44,7 +43,6 @@ public class AutoSyncConfigService {
       Boolean enabled,
       int size
   ) {
-    // idAfter 우선, 없으면 cursor UUID를 사용
     UUID effectiveIdAfter = idAfter != null ? idAfter : cursor;
     int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
 
@@ -54,7 +52,25 @@ public class AutoSyncConfigService {
         enabled,
         PageRequest.of(0, validatedSize, Sort.by(Sort.Direction.ASC, "id"))
     );
-    Page<AutoSyncConfigResponse> responsePage = page.map(autoSyncConfigMapper::toResponse);
-    return cursorPageMapper.fromPage(responsePage, AutoSyncConfigResponse::id);
+
+    List<AutoSyncConfigResponse> content = page.getContent().stream()
+        .map(autoSyncConfigMapper::toResponse)
+        .toList();
+
+    String nextCursor = null;
+    UUID nextIdAfter = null;
+    if (page.hasNext() && !content.isEmpty()) {
+      nextIdAfter = content.get(content.size() - 1).id();
+      nextCursor = nextIdAfter.toString();
+    }
+
+    return CursorPageResponse.of(
+        content,
+        nextCursor,
+        nextIdAfter,
+        validatedSize,
+        page.getTotalElements(),
+        page.hasNext()
+    );
   }
 }

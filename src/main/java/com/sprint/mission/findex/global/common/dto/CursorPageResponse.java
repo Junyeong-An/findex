@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record CursorPageResponse<T>(
     List<T> content,
-    UUID nextCursor,
+    String nextCursor,
     UUID nextIdAfter,
     int size,
     Long totalElements,
@@ -14,7 +14,7 @@ public record CursorPageResponse<T>(
 
   public static <T> CursorPageResponse<T> of(
       List<T> content,
-      UUID nextCursor,
+      String nextCursor,
       UUID nextIdAfter,
       int size,
       Long totalElements,
