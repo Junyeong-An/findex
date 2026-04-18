@@ -36,13 +36,15 @@ public class AutoSyncConfigController implements AutoSyncConfigApi {
   @GetMapping
   public ResponseEntity<CursorPageResponse<AutoSyncConfigResponse>> findAll(
       @RequestParam(required = false) UUID idAfter,
-      @RequestParam(required = false) UUID cursor,
+      @RequestParam(required = false) String cursor,
       @RequestParam(required = false) UUID indexInfoId,
       @RequestParam(required = false) Boolean enabled,
+      @RequestParam(defaultValue = "indexInfo.indexName") String sortField,
+      @RequestParam(defaultValue = "asc") String sortDirection,
       @RequestParam(defaultValue = "10") int size
   ) {
     return ResponseEntity.ok(
-        autoSyncConfigService.findAll(idAfter, cursor, indexInfoId, enabled, size)
+        autoSyncConfigService.findAll(idAfter, cursor, indexInfoId, enabled, sortField, sortDirection, size)
     );
   }
 }

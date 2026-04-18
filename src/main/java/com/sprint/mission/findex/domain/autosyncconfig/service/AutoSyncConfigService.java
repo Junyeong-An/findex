@@ -6,14 +6,11 @@ import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.autosyncconfig.mapper.AutoSyncConfigMapper;
 import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
-import com.sprint.mission.findex.global.common.mapper.CursorPageMapper;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +20,11 @@ public class AutoSyncConfigService {
 
   private static final int MIN_PAGE_SIZE = 1;
   private static final int MAX_PAGE_SIZE = 100;
+  private static final String DEFAULT_SORT_FIELD = "indexInfo.indexName";
+  private static final List<String> ALLOWED_SORT_FIELDS = List.of("indexInfo.indexName", "enabled");
 
   private final AutoSyncConfigMapper autoSyncConfigMapper;
   private final AutoSyncConfigRepository autoSyncConfigRepository;
-  private final CursorPageMapper cursorPageMapper;
 
   @Transactional
   public AutoSyncConfigResponse updateEnabled(UUID id, AutoSyncConfigUpdateRequest request) {
@@ -39,22 +37,62 @@ public class AutoSyncConfigService {
   @Transactional(readOnly = true)
   public CursorPageResponse<AutoSyncConfigResponse> findAll(
       UUID idAfter,
-      UUID cursor,
+      String cursor,
       UUID indexInfoId,
       Boolean enabled,
+      String sortField,
+      String sortDirection,
       int size
   ) {
-    // idAfter 우선, 없으면 cursor UUID를 사용
-    UUID effectiveIdAfter = idAfter != null ? idAfter : cursor;
     int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
+    String effectiveSortField = (sortField == null || sortField.isBlank()) ? DEFAULT_SORT_FIELD : sortField;
+    if (!ALLOWED_SORT_FIELDS.contains(effectiveSortField)) {
+      throw new ApiException(ERROR.INVALID_SORT_FIELD);
+    }
+    boolean asc = !"desc".equalsIgnoreCase(sortDirection);
 
-    Page<AutoSyncConfig> page = autoSyncConfigRepository.findAllWithCursor(
-        effectiveIdAfter,
+    List<AutoSyncConfig> results = autoSyncConfigRepository.findAllWithCursor(
+        cursor,
+        idAfter,
         indexInfoId,
         enabled,
-        PageRequest.of(0, validatedSize, Sort.by(Sort.Direction.ASC, "id"))
+        effectiveSortField,
+        asc,
+        validatedSize + 1
     );
-    Page<AutoSyncConfigResponse> responsePage = page.map(autoSyncConfigMapper::toResponse);
-    return cursorPageMapper.fromPage(responsePage, AutoSyncConfigResponse::id);
+
+    boolean hasNext = results.size() > validatedSize;
+
+    List<AutoSyncConfigResponse> content = results.stream()
+        .limit(validatedSize)
+        .map(autoSyncConfigMapper::toResponse)
+        .toList();
+
+    String nextCursor = null;
+    UUID nextIdAfter = null;
+    if (hasNext) {
+      AutoSyncConfigResponse last = content.get(content.size() - 1);
+      nextIdAfter = last.id();
+      nextCursor = extractCursor(last, effectiveSortField);
+    }
+
+    long totalElements = autoSyncConfigRepository.countWithFilter(indexInfoId, enabled);
+
+    return CursorPageResponse.of(
+        content,
+        nextCursor,
+        nextIdAfter,
+        validatedSize,
+        totalElements,
+        hasNext
+    );
+  }
+
+  private String extractCursor(AutoSyncConfigResponse last, String sortField) {
+    return switch (sortField) {
+      case "indexInfo.indexName" -> last.indexName();
+      case "enabled" -> String.valueOf(last.enabled());
+      default -> last.id().toString();
+    };
   }
 }

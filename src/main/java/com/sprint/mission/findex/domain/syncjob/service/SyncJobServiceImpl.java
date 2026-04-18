@@ -108,11 +108,11 @@ public class SyncJobServiceImpl implements SyncJobService {
         .map(SyncJobResponse::from)
         .toList();
 
-    UUID nextCursor = null;
+    String nextCursor = null;
 
-    if (!content.isEmpty()) {
+    if (hasNext && !content.isEmpty()) {
       SyncJobResponse lastElement = content.get(content.size() - 1);
-      nextCursor = lastElement.id();
+      nextCursor = lastElement.id().toString();
     }
 
     return CursorPageResponse.of(
