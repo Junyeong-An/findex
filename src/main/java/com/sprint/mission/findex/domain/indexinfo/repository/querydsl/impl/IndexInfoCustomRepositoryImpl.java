@@ -12,6 +12,7 @@ import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoQueryCondition;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
+import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoSummaryResponse;
 import com.sprint.mission.findex.domain.indexinfo.repository.querydsl.IndexInfoCustomRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import java.util.List;
@@ -25,6 +26,19 @@ import org.springframework.stereotype.Repository;
 public class IndexInfoCustomRepositoryImpl implements IndexInfoCustomRepository {
 
   private final JPAQueryFactory queryFactory;
+
+  @Override
+  public List<IndexInfoSummaryResponse> findIndexInfoSummaries() {
+    return queryFactory
+        .select(Projections.constructor(
+            IndexInfoSummaryResponse.class,
+            indexInfo.id,
+            indexInfo.indexClassification,
+            indexInfo.indexName
+        ))
+        .from(indexInfo)
+        .fetch();
+  }
 
   @Override
   public CursorPageResponse<IndexInfoResponse> findIndexInfos(IndexInfoQueryCondition condition) {

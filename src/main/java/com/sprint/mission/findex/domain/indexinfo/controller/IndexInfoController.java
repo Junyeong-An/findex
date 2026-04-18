@@ -4,11 +4,13 @@ import com.sprint.mission.findex.domain.indexinfo.controller.api.IndexInfoApi;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoCreateRequest;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoQueryCondition;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
+import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoSummaryResponse;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoUpdateRequest;
 import com.sprint.mission.findex.domain.indexinfo.service.IndexInfoService;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -67,5 +69,12 @@ public class IndexInfoController implements IndexInfoApi {
     CursorPageResponse<IndexInfoResponse> list = indexInfoService.getList(condition);
     return ResponseEntity.status(HttpStatus.OK)
         .body(list);
+  }
+
+  @GetMapping(path = "summaries")
+  public ResponseEntity<List<IndexInfoSummaryResponse>> getSummaries() {
+    List<IndexInfoSummaryResponse> summaries = indexInfoService.getSummaries();
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(summaries);
   }
 }
