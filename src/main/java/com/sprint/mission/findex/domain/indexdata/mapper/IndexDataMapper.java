@@ -5,12 +5,11 @@ import com.sprint.mission.findex.domain.indexdata.entity.IndexData;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.domain.syncclient.dto.IndexDataApiResponse;
 import java.util.List;
-import java.util.UUID;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface IndexDataMapper {
 
   @Mapping(target = "indexInfoId", expression = "java(indexData.getIndexInfo().getId())")
