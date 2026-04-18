@@ -8,6 +8,7 @@ import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfig
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoCreateRequest;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoQueryCondition;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoResponse;
+import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoSummaryResponse;
 import com.sprint.mission.findex.domain.indexinfo.dto.IndexInfoUpdateRequest;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.domain.indexinfo.entity.SourceType;
@@ -15,7 +16,7 @@ import com.sprint.mission.findex.domain.indexinfo.mapper.IndexInfoMapper;
 import com.sprint.mission.findex.domain.indexinfo.repository.IndexInfoRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
-import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,6 +75,10 @@ public class IndexInfoService {
 
   public CursorPageResponse<IndexInfoResponse> getList(IndexInfoQueryCondition condition) {
     return indexInfoRepository.findIndexInfos(condition);
+  }
+
+  public List<IndexInfoSummaryResponse> getSummaries() {
+    return this.indexInfoRepository.findIndexInfoSummaries();
   }
 
   private IndexInfo create(IndexInfoCreateRequest req, SourceType sourceType) {
