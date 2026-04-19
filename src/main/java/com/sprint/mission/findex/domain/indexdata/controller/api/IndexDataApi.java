@@ -1,7 +1,8 @@
 package com.sprint.mission.findex.domain.indexdata.controller.api;
 
 import com.sprint.mission.findex.domain.indexdata.dto.IndexDataCreateRequest;
-import com.sprint.mission.findex.domain.indexdata.dto.IndexDataListRequest;
+import com.sprint.mission.findex.domain.indexdata.dto.IndexDataExportRequest;
+import com.sprint.mission.findex.domain.indexdata.dto.IndexDataQueryCondition;
 import com.sprint.mission.findex.domain.indexdata.dto.IndexDataResponse;
 import com.sprint.mission.findex.domain.indexdata.dto.IndexDataUpdateRequest;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
@@ -13,7 +14,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -65,5 +68,17 @@ public interface IndexDataApi {
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<CursorPageResponse<IndexDataResponse>> getList(
-      @ModelAttribute IndexDataListRequest request);
+      @ModelAttribute IndexDataQueryCondition request);
+
+  @Operation(summary = "지수 데이터 CSV Export", description = "지수 데이터를 CSV 파일로 다운로드합니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "CSV 파일 생성 성공"),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "500", description = "서버 오류",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  void exportCsv(
+      @ModelAttribute IndexDataExportRequest request,
+      HttpServletResponse response) throws IOException;
 }

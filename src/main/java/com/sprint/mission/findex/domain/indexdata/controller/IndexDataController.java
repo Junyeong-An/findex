@@ -2,12 +2,15 @@ package com.sprint.mission.findex.domain.indexdata.controller;
 
 import com.sprint.mission.findex.domain.indexdata.controller.api.IndexDataApi;
 import com.sprint.mission.findex.domain.indexdata.dto.IndexDataCreateRequest;
-import com.sprint.mission.findex.domain.indexdata.dto.IndexDataListRequest;
+import com.sprint.mission.findex.domain.indexdata.dto.IndexDataExportRequest;
+import com.sprint.mission.findex.domain.indexdata.dto.IndexDataQueryCondition;
 import com.sprint.mission.findex.domain.indexdata.dto.IndexDataResponse;
 import com.sprint.mission.findex.domain.indexdata.dto.IndexDataUpdateRequest;
 import com.sprint.mission.findex.domain.indexdata.service.IndexDataService;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -51,9 +54,14 @@ public class IndexDataController implements IndexDataApi {
 
   @GetMapping
   public ResponseEntity<CursorPageResponse<IndexDataResponse>> getList(
-      @ModelAttribute IndexDataListRequest request) {
+      @ModelAttribute IndexDataQueryCondition request) {
     return ResponseEntity.ok(indexDataService.getList(request));
   }
 
-
+  @GetMapping("/export/csv")
+  public void exportCsv(
+      @ModelAttribute IndexDataExportRequest request,
+      HttpServletResponse response) throws IOException {
+    indexDataService.exportCsv(request, response);
+  }
 }
