@@ -2,6 +2,7 @@ package com.sprint.mission.findex.domain.syncjob.controller;
 
 import com.sprint.mission.findex.domain.syncjob.controller.api.SyncJobApi;
 import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
+import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobSearchCondition;
 import com.sprint.mission.findex.domain.syncjob.service.SyncJobService;
@@ -10,9 +11,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,21 +25,31 @@ public class SyncJobController implements SyncJobApi {
 
   private final SyncJobService syncJobService;
 
+  @PostMapping("/index-infos")
+  @Override
+  public ResponseEntity<List<SyncJobResponse>> syncIndexInfos(
+      @Valid @RequestBody IndexInfoSyncRequest request,
+      HttpServletRequest servletRequest) {
+
+    String workerIp = servletRequest.getRemoteAddr();
+    List<SyncJobResponse> results = syncJobService.syncIndexInfos(request.targetDate(), workerIp);
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(results);
+  }
+
   @PostMapping("/index-data")
   @Override
-  public ResponseEntity<String> syncIndexData(
+  public ResponseEntity<List<SyncJobResponse>> syncIndexData(
       @Valid @RequestBody IndexDataSyncRequest request,
       HttpServletRequest servletRequest) {
 
     String workerIp = servletRequest.getRemoteAddr();
-
-    syncJobService.syncIndexData(
+    List<SyncJobResponse> results = syncJobService.syncIndexData(
         request.indexInfoIds(),
         request.baseDateFrom(),
         request.baseDateTo(),
         workerIp
     );
-    return ResponseEntity.ok("데이터 연동이 성공적으로 완료되었습니다.");
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(results);
   }
 
   @GetMapping
