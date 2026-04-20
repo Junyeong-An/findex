@@ -1,15 +1,17 @@
-package com.sprint.mission.findex.domain.syncjob.repository;
+package com.sprint.mission.findex.domain.syncjob.repository.querydsl.impl;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
-import com.sprint.mission.findex.domain.syncjob.dto.SyncJobSearchCondition;
+import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.entity.JobResult;
 import com.sprint.mission.findex.domain.syncjob.entity.JobType;
 import com.sprint.mission.findex.domain.syncjob.entity.SyncJob;
+import com.sprint.mission.findex.domain.syncjob.repository.querydsl.SyncJobCustomRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -24,13 +26,15 @@ import static com.sprint.mission.findex.domain.syncjob.entity.QSyncJob.syncJob;
 
 @Repository
 @RequiredArgsConstructor
-public class SyncJobRepositoryImpl implements SyncJobCustomRepository {
+public class SyncJobCustomRepositoryImpl implements SyncJobCustomRepository {
 
   private final JPAQueryFactory queryFactory;
 
+  private static final ZoneId KST_ZONE = ZoneId.of("Asia/Seoul");
+
   @Override
   public CursorPageResponse<SyncJobResponse> searchSyncJobPage(
-      SyncJobSearchCondition condition, String cursor, UUID idAfter,
+      SyncJobQueryCondition condition, String cursor, UUID idAfter,
       String sortField, String sortDirection, int size) {
 
     String activeSortField = (sortField != null && !sortField.isBlank()) ? sortField : "jobTime";
@@ -141,4 +145,16 @@ public class SyncJobRepositoryImpl implements SyncJobCustomRepository {
   private BooleanExpression containsWorker(String worker) { return worker != null && !worker.isBlank() ? syncJob.worker.contains(worker) : null; }
   private BooleanExpression goeJobTimeFrom(Instant jobTimeFrom) { return jobTimeFrom != null ? syncJob.jobTime.goe(jobTimeFrom) : null; }
   private BooleanExpression loeJobTimeTo(Instant jobTimeTo) { return jobTimeTo != null ? syncJob.jobTime.loe(jobTimeTo) : null; }
+
+  private BooleanExpression goeJobTimeFrom(LocalDate jobTimeFrom) {
+    if (jobTimeFrom == null) return null;
+    Instant fromInstant = jobTimeFrom.atStartOfDay(KST_ZONE).toInstant();
+    return syncJob.jobTime.goe(fromInstant);
+  }
+
+  private BooleanExpression loeJobTimeTo(LocalDate jobTimeTo) {
+    if (jobTimeTo == null) return null;
+    Instant nextDayStart = jobTimeTo.plusDays(1).atStartOfDay(KST_ZONE).toInstant();
+    return syncJob.jobTime.lt(nextDayStart);
+  }
 }

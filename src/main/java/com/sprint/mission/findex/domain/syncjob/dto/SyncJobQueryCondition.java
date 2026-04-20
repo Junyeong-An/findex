@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Schema(description = "연동 이력 검색 필터")
-public record SyncJobSearchCondition(
+public record SyncJobQueryCondition(
 
     @Schema(description = "연동 작업 유형 (INDEX_INFO, INDEX_DATA)")
     JobType jobType,
@@ -26,11 +26,11 @@ public record SyncJobSearchCondition(
     @Schema(description = "작업자")
     String worker,
 
-    @Schema(description = "작업 일시 (부터)", example = "2024-04-01T00:00:00Z")
-    Instant jobTimeFrom,
+    @Schema(description = "작업 일시 (부터)", example = "2024-04-01")
+    LocalDate jobTimeFrom,
 
-    @Schema(description = "작업 일시 (까지)", example = "2024-04-10T23:59:59Z")
-    Instant jobTimeTo,
+    @Schema(description = "작업 일시 (까지)", example = "2024-04-10")
+    LocalDate jobTimeTo,
 
     @Schema(description = "작업 상태 (SUCCESS, FAILED)")
     JobResult status
