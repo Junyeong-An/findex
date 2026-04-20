@@ -1,4 +1,4 @@
-package com.sprint.mission.findex.domain.autosyncconfig.controller;
+package com.sprint.mission.findex.domain.autosyncconfig.controller.api;
 
 import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigResponse;
 import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigUpdateRequest;
