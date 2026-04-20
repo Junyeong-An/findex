@@ -5,6 +5,7 @@ import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobSearchCondition;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -24,9 +25,24 @@ public interface SyncJobApi {
       @Valid @RequestBody IndexDataSyncRequest request,
       HttpServletRequest servletRequest);
 
-  @Operation(summary = "연동 작업 목록 조회", description = "ID 기반 커서를 사용하여 지수 데이터 연동 이력을 페이징 조회합니다.")
+  @Operation(summary = "연동 작업 목록 조회", description = "정렬값(cursor)과 ID(idAfter) 기반 복합 커서를 사용하여 연동 이력을 페이징 조회합니다.")
   ResponseEntity<CursorPageResponse<SyncJobResponse>> getSyncJobHistory(
+
       @Valid @ParameterObject @ModelAttribute SyncJobSearchCondition condition,
-      @RequestParam(required = false) UUID cursor,
-      @RequestParam(defaultValue = "10") int size);
+
+      @Parameter(description = "커서 (다음 페이지 시작점)")
+      @RequestParam(required = false) String cursor,
+
+      @Parameter(description = "이전 페이지 마지막 요소 ID")
+      @RequestParam(required = false) UUID idAfter,
+
+      @Parameter(description = "정렬 필드 (targetDate, jobTime)")
+      @RequestParam(defaultValue = "jobTime") String sortField,
+
+      @Parameter(description = "정렬 방향 (asc, desc)")
+      @RequestParam(defaultValue = "desc") String sortDirection,
+
+      @Parameter(description = "페이지 크기")
+      @RequestParam(defaultValue = "10") int size
+  );
 }
