@@ -2,6 +2,7 @@ package com.sprint.mission.findex.domain.syncjob.repository;
 
 import com.sprint.mission.findex.domain.syncjob.entity.JobType;
 import com.sprint.mission.findex.domain.syncjob.entity.SyncJob;
+import com.sprint.mission.findex.domain.syncjob.repository.querydsl.SyncJobCustomRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
