@@ -87,6 +87,19 @@ public class SyncBatchService {
   }
 
   @Transactional
+  public void recordSuccess(IndexInfo indexInfo, LocalDate targetDate) {
+    syncJobRepository.save(SyncJob.builder()
+        .indexInfo(indexInfo)
+        .jobType(JobType.INDEX_DATA)
+        .targetDate(targetDate)
+        .worker(SYSTEM_WORKER)
+        .result(JobResult.SUCCESS)
+        .build());
+    log.info("주말 자동 연동 - 데이터 없음으로 기록 - indexName: {}, targetDate: {}",
+        indexInfo.getIndexName(), targetDate);
+  }
+
+  @Transactional
   public void recordFailure(IndexInfo indexInfo, LocalDate targetDate, String errorMessage) {
     syncJobRepository.save(SyncJob.builder()
         .indexInfo(indexInfo)
