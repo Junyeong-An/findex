@@ -97,7 +97,7 @@ public class AutoSyncConfigRepositoryImpl implements AutoSyncConfigRepositoryCus
           new OrderSpecifier<>(order, autoSyncConfig.id)
       };
       default -> new OrderSpecifier<?>[]{
-          new OrderSpecifier<>(Order.ASC, autoSyncConfig.id)
+          new OrderSpecifier<>(order, autoSyncConfig.id)
       };
     };
   }
