@@ -2,10 +2,10 @@ package com.sprint.mission.findex.domain.autosyncconfig.service;
 
 import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigResponse;
 import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigUpdateRequest;
+import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncQueryCondition;
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.autosyncconfig.mapper.AutoSyncConfigMapper;
 import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
-import com.sprint.mission.findex.global.common.dto.CursorPageRequest;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
@@ -22,7 +22,6 @@ public class AutoSyncConfigService {
 
   private static final int MIN_PAGE_SIZE = 1;
   private static final int MAX_PAGE_SIZE = 100;
-  private static final String DEFAULT_SORT_FIELD = "indexInfo.indexName";
   private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("indexInfo.indexName", "enabled");
 
   private final AutoSyncConfigMapper autoSyncConfigMapper;
@@ -37,22 +36,17 @@ public class AutoSyncConfigService {
   }
 
   @Transactional(readOnly = true)
-  public CursorPageResponse<AutoSyncConfigResponse> findAll(
-      UUID indexInfoId,
-      Boolean enabled,
-      CursorPageRequest pageRequest
-  ) {
-    int size = pageRequest.size() != null ? pageRequest.size() : 10;
-    int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
-    String effectiveSortField = ALLOWED_SORT_FIELDS.contains(pageRequest.sortField())
-        ? pageRequest.sortField() : DEFAULT_SORT_FIELD;
-    boolean asc = !"desc".equalsIgnoreCase(pageRequest.sortDirection());
+  public CursorPageResponse<AutoSyncConfigResponse> findAll(AutoSyncQueryCondition condition) {
+    int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(condition.size(), MAX_PAGE_SIZE));
+    String effectiveSortField = ALLOWED_SORT_FIELDS.contains(condition.sortField())
+        ? condition.sortField() : "indexInfo.indexName";
+    boolean asc = !"desc".equalsIgnoreCase(condition.sortDirection());
 
     List<AutoSyncConfig> results = autoSyncConfigRepository.findAllWithCursor(
-        pageRequest.cursor(),
-        pageRequest.idAfter(),
-        indexInfoId,
-        enabled,
+        condition.cursor(),
+        condition.idAfter(),
+        condition.indexInfoId(),
+        condition.enabled(),
         effectiveSortField,
         asc,
         validatedSize + 1
@@ -73,7 +67,8 @@ public class AutoSyncConfigService {
       nextCursor = extractCursor(last, effectiveSortField);
     }
 
-    long totalElements = autoSyncConfigRepository.countWithFilter(indexInfoId, enabled);
+    long totalElements = autoSyncConfigRepository.countWithFilter(
+        condition.indexInfoId(), condition.enabled());
 
     return CursorPageResponse.of(
         content,

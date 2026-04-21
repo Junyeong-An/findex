@@ -4,7 +4,6 @@ import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
-import com.sprint.mission.findex.global.common.dto.CursorPageRequest;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,7 +30,6 @@ public interface SyncJobApi {
 
   @Operation(summary = "연동 작업 목록 조회", description = "정렬값(cursor)과 ID(idAfter) 기반 복합 커서를 사용하여 연동 이력을 페이징 조회합니다.")
   ResponseEntity<CursorPageResponse<SyncJobResponse>> getSyncJobHistory(
-      @Valid @ParameterObject @ModelAttribute SyncJobQueryCondition condition,
-      @Valid @ParameterObject @ModelAttribute CursorPageRequest pageRequest
+      @Valid @ParameterObject @ModelAttribute SyncJobQueryCondition condition
   );
 }

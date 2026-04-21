@@ -6,17 +6,20 @@ import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.service.SyncJobService;
-import com.sprint.mission.findex.global.common.dto.CursorPageRequest;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/sync-jobs")
@@ -55,12 +58,8 @@ public class SyncJobController implements SyncJobApi {
   @GetMapping
   @Override
   public ResponseEntity<CursorPageResponse<SyncJobResponse>> getSyncJobHistory(
-      @Valid @ParameterObject @ModelAttribute SyncJobQueryCondition condition,
-      @Valid @ParameterObject @ModelAttribute CursorPageRequest pageRequest) {
+      @Valid @ParameterObject @ModelAttribute SyncJobQueryCondition condition) {
 
-    CursorPageResponse<SyncJobResponse> response =
-        syncJobService.getSyncJobHistory(condition, pageRequest);
-
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(syncJobService.getSyncJobHistory(condition));
   }
 }

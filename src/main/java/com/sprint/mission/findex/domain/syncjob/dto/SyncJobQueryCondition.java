@@ -4,7 +4,8 @@ import com.sprint.mission.findex.domain.syncjob.entity.JobResult;
 import com.sprint.mission.findex.domain.syncjob.entity.JobType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
-import java.time.Instant;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -33,9 +34,38 @@ public record SyncJobQueryCondition(
     LocalDate jobTimeTo,
 
     @Schema(description = "작업 상태 (SUCCESS, FAILED)")
-    JobResult status
+    JobResult status,
+
+    @Schema(description = "이전 페이지 마지막 ID (tiebreaker)")
+    UUID idAfter,
+
+    @Schema(description = "커서 값 (정렬 필드 기준 마지막 값)")
+    String cursor,
+
+    @Schema(description = "정렬 필드 (targetDate, jobTime)", example = "jobTime")
+    String sortField,
+
+    @Schema(description = "정렬 방향 (asc, desc)", example = "desc")
+    String sortDirection,
+
+    @Min(1) @Max(100)
+    @Schema(description = "페이지 크기", example = "10")
+    Integer size
 
 ) {
+
+  public SyncJobQueryCondition {
+    if (sortField == null || sortField.isBlank()) {
+      sortField = "jobTime";
+    }
+    if (sortDirection == null || sortDirection.isBlank()) {
+      sortDirection = "desc";
+    }
+    if (size == null) {
+      size = 10;
+    }
+  }
+
   @AssertTrue(message = "대상 날짜(부터)는 대상 날짜(까지)보다 미래일 수 없습니다.")
   public boolean isBaseDateRangeValid() {
     return baseDateFrom == null || baseDateTo == null || !baseDateFrom.isAfter(baseDateTo);

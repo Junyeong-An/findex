@@ -15,7 +15,6 @@ import com.sprint.mission.findex.domain.syncjob.entity.JobResult;
 import com.sprint.mission.findex.domain.syncjob.entity.JobType;
 import com.sprint.mission.findex.domain.syncjob.entity.SyncJob;
 import com.sprint.mission.findex.domain.syncjob.repository.SyncJobRepository;
-import com.sprint.mission.findex.global.common.dto.CursorPageRequest;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
 import java.time.LocalDate;
@@ -134,16 +133,10 @@ public class SyncJobService {
   }
 
   @Transactional(readOnly = true)
-  public CursorPageResponse<SyncJobResponse> getSyncJobHistory(
-      SyncJobQueryCondition condition,
-      CursorPageRequest pageRequest) {
-
-    String sortField = pageRequest.sortField() != null ? pageRequest.sortField() : "jobTime";
-    String sortDirection = pageRequest.sortDirection() != null ? pageRequest.sortDirection() : "desc";
-    int size = pageRequest.size() != null ? pageRequest.size() : 10;
-
+  public CursorPageResponse<SyncJobResponse> getSyncJobHistory(SyncJobQueryCondition condition) {
     return syncJobRepository.searchSyncJobPage(
-        condition, pageRequest.cursor(), pageRequest.idAfter(), sortField, sortDirection, size);
+        condition, condition.cursor(), condition.idAfter(),
+        condition.sortField(), condition.sortDirection(), condition.size());
   }
 
   private IndexInfoCreateRequest toCreateRequest(IndexDataApiResponse response) {
