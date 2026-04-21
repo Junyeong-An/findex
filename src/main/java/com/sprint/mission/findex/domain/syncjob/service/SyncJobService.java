@@ -18,14 +18,18 @@ import com.sprint.mission.findex.domain.syncjob.repository.SyncJobRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +44,56 @@ public class SyncJobService {
   private final KrxOpenApiClient krxOpenApiClient;
   private final IndexDataMapper indexDataMapper;
   private final IndexInfoSyncProcessor indexInfoSyncProcessor;
+
+  private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
+  @Value("${sync.default-sync-days:7}")
+  private int defaultSyncDays;
+
+  @Value("${sync.fallback-limit-days:14}")
+  private int fallbackLimitDays;
+
   private final IndexDataSyncProcessor indexDataSyncProcessor;
 
   public List<SyncJobResponse> syncIndexInfos(LocalDate targetDate, String workerIp) {
-    List<IndexDataApiResponse> responses = krxOpenApiClient.fetchByDate(targetDate);
+    List<IndexDataApiResponse> responses = List.of();
+
+    if (targetDate != null) {
+      responses = krxOpenApiClient.fetchByDateRange(null, targetDate, targetDate);
+    } else {
+      for (int i = 0; i <= defaultSyncDays; i++) {
+        LocalDate candidate = LocalDate.now(KST).minusDays(i);
+        try {
+          responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
+          if (!responses.isEmpty()) {
+            targetDate = candidate;
+            break;
+          }
+        } catch (ApiException e) {
+          log.warn("[IndexInfo Sync] {} 데이터 조회 실패, 다음 날짜로 탐색: {}", candidate, e.getMessage());
+        }
+      }
+      if (responses.isEmpty()) {
+        log.warn("[IndexInfo Sync] 최근 {}일 이내 데이터 없음, 최대 {}일까지 확장 탐색", defaultSyncDays, fallbackLimitDays);
+        for (int i = defaultSyncDays + 1; i <= fallbackLimitDays; i++) {
+          LocalDate candidate = LocalDate.now(KST).minusDays(i);
+          try {
+            responses = krxOpenApiClient.fetchByDateRange(null, candidate, candidate);
+            if (!responses.isEmpty()) {
+              targetDate = candidate;
+              break;
+            }
+          } catch (ApiException e) {
+            log.warn("[IndexInfo Sync] {} 데이터 조회 실패, 다음 날짜로 탐색: {}", candidate, e.getMessage());
+          }
+        }
+      }
+    }
+
+    if (responses.isEmpty()) {
+      throw new ApiException(ApiException.ERROR.SYNC_JOB_OPEN_API_ERROR);
+    }
+
     List<SyncJobResponse> results = new ArrayList<>();
 
     for (IndexDataApiResponse response : responses) {
@@ -71,11 +121,10 @@ public class SyncJobService {
     }
     return results;
   }
-
   public List<SyncJobResponse> syncIndexData(List<UUID> indexInfoIds, LocalDate baseDateFrom, LocalDate baseDateTo, String workerIp) {
 
     if (baseDateFrom.isAfter(baseDateTo)) {
-      throw new IllegalArgumentException("시작일은 종료일보다 미래일 수 없습니다.");
+      throw new ApiException(ApiException.ERROR.COMMON_INVALID_REQUEST);
     }
 
     boolean isSingleDay = baseDateFrom.isEqual(baseDateTo);
@@ -96,13 +145,26 @@ public class SyncJobService {
             baseDateTo
         );
 
-        int dataSize = (externalDataList != null) ? externalDataList.size() : 0;
+        int dataSize = externalDataList.size();
+
+        if (dataSize == 0) {
+          throw new ApiException(ApiException.ERROR.INDEX_DATA_NOT_FOUND);
+        }
+
         LocalDate actualTargetDate = baseDateTo;
-        List<IndexData> indexDataList = null;
 
-        if (dataSize > 0) {
-          indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo);
+        Set<LocalDate> existingDates = indexDataRepository
+            .findByIndexInfoIdAndBaseDateBetween(indexInfo.getId(), baseDateFrom, baseDateTo)
+            .stream()
+            .map(IndexData::getBaseDate)
+            .collect(Collectors.toSet());
 
+        List<IndexData> indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo)
+            .stream()
+            .filter(d -> !existingDates.contains(d.getBaseDate()))
+            .collect(Collectors.toList());
+
+        if (!indexDataList.isEmpty()) {
           actualTargetDate = indexDataList.stream()
               .map(IndexData::getBaseDate)
               .max(LocalDate::compareTo)
@@ -111,13 +173,12 @@ public class SyncJobService {
 
         String logMessage = isSingleDay
             ? null
-            : String.format("범위 연동: %s ~ %s (%d건)", baseDateFrom, baseDateTo, dataSize);
+            : String.format("범위 연동: %s ~ %s (%d건)", baseDateFrom, baseDateTo, indexDataList.size());
 
         results.add(indexDataSyncProcessor.saveIndexDataAndHistory(
             indexDataList, indexInfo, actualTargetDate, workerIp, logMessage));
-
         log.info("[Sync 성공] 지수: {}, 요청범위: {} ~ {} -> 실제연동기준일: {} ({}건)",
-            indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, dataSize);
+            indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, indexDataList.size());
 
       } catch (Exception e) {
         String errorLog = isSingleDay

@@ -1,28 +1,35 @@
 package com.sprint.mission.findex.domain.syncclient.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.findex.domain.syncclient.dto.IndexDataApiResponse;
 import com.sprint.mission.findex.domain.syncclient.dto.KrxApiResponseWrapper;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
+@Slf4j
 @Component
 public class KrxOpenApiClientImpl implements KrxOpenApiClient {
 
-    private final RestTemplate restTemplate;
+    private static final int NUM_OF_ROWS = 1000;
+
+    private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final String baseUrl;
     private final String apiKey;
@@ -30,12 +37,15 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
     public KrxOpenApiClientImpl(
             @Value("${public-data.base-url}") String baseUrl,
             @Value("${public-data.api-key}") String apiKey,
-            RestTemplateBuilder restTemplateBuilder,
             ObjectMapper objectMapper
     ) {
-        this.restTemplate = restTemplateBuilder
-                .connectTimeout(Duration.ofSeconds(3))
-                .readTimeout(Duration.ofSeconds(5))
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+        factory.setReadTimeout(Duration.ofSeconds(5));
+
+        this.restClient = RestClient.builder()
+                .baseUrl(baseUrl)
+                .requestFactory(factory)
                 .build();
         this.baseUrl = baseUrl;
         this.apiKey = apiKey;
@@ -44,134 +54,89 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
 
     @Override
     public List<IndexDataApiResponse> fetchByDateRange(String indexName, LocalDate from, LocalDate to) {
-        if (indexName == null || indexName.isBlank()) {
+        if (from == null || to == null || from.isAfter(to)) {
             throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
         }
-        if (from == null || to == null) {
-            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
-        }
-        if (from.isAfter(to)) {
-            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
-        }
+        return fetchAllPages(from, to, indexName);
+    }
+
+    private List<IndexDataApiResponse> fetchAllPages(LocalDate from, LocalDate to, String indexName) {
+        List<IndexDataApiResponse> allItems = new ArrayList<>();
+        int pageNo = 1;
 
         try {
-            int pageNo = 1;
-            int numOfRows = 1000;
-            List<IndexDataApiResponse> allItems = new ArrayList<>();
-
             while (true) {
-                URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/getStockMarketIndex")
-                        .queryParam("serviceKey", apiKey)
-                        .queryParam("resultType", "json")
-                        .queryParam("pageNo", pageNo)
-                        .queryParam("numOfRows", numOfRows)
-                        .queryParam("beginBasDt", from.format(DateTimeFormatter.BASIC_ISO_DATE))
-                        .queryParam("endBasDt", to.format(DateTimeFormatter.BASIC_ISO_DATE))
-                        .queryParam("idxNm", indexName)
-                        .build(true)
-                        .toUri();
-                String responseBody = restTemplate.getForObject(uri, String.class);
+                List<IndexDataApiResponse> pageItems = fetchPage(from, to, indexName, pageNo);
 
-                if (responseBody == null || responseBody.isBlank()) {
-                    break;
-                }
-
-                KrxApiResponseWrapper wrapper =
-                        objectMapper.readValue(responseBody, KrxApiResponseWrapper.class);
-
-                if (wrapper.response() == null
-                        || wrapper.response().body() == null
-                        || wrapper.response().body().items() == null) {
-                    break;
-                }
-
-                List<IndexDataApiResponse> pageItems =
-                        wrapper.response().body().items().item();
-
-                if (pageItems == null || pageItems.isEmpty()) {
-                    break;
-                }
+                if (pageItems.isEmpty()) break;
 
                 allItems.addAll(pageItems);
 
-                if (pageItems.size() < numOfRows) {
-                    break;
-                }
+                if (pageItems.size() < NUM_OF_ROWS) break;
 
                 pageNo++;
             }
-
-            return allItems.isEmpty() ? Collections.emptyList() : allItems;
-
         } catch (ApiException e) {
             throw e;
         } catch (RestClientException e) {
-            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
-        } catch (Exception e) {
-            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
+            log.error("[KRX API] HTTP 호출 실패: {}", e.getMessage(), e);
+            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR, e);
         }
+
+        return allItems.isEmpty() ? Collections.emptyList() : allItems;
     }
 
-    @Override
-    public List<IndexDataApiResponse> fetchByDate(LocalDate date) {
-        if (date == null) {
-            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
-        }
-        if (date.isAfter(LocalDate.now())) {
-            throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
+    private List<IndexDataApiResponse> fetchPage(LocalDate from, LocalDate to, String indexName, int pageNo) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl + "/getStockMarketIndex")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("resultType", "json")
+                .queryParam("numOfRows", NUM_OF_ROWS)
+                .queryParam("pageNo", pageNo)
+                .queryParam("beginBasDt", from.format(DateTimeFormatter.BASIC_ISO_DATE))
+                .queryParam("endBasDt", to.plusDays(1).format(DateTimeFormatter.BASIC_ISO_DATE));
+
+        if (indexName != null && !indexName.isBlank()) {
+            builder.queryParam("idxNm", UriUtils.encode(indexName, StandardCharsets.UTF_8));
         }
 
+        URI uri = builder.build(true).toUri();
+        log.debug("[KRX API] 요청 - pageNo: {}, from: {}, to: {}, indexName: {}", pageNo, from, to, indexName);
+
+        String responseBody = restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(String.class);
+
+        log.debug("[KRX API] 응답 body (앞 200자): {}", responseBody != null ? responseBody.substring(0, Math.min(200, responseBody.length())) : "null");
+
+        if (responseBody == null || responseBody.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        KrxApiResponseWrapper wrapper;
         try {
-            int pageNo = 1;
-            int numOfRows = 1000;
-            List<IndexDataApiResponse> allItems = new ArrayList<>();
+            wrapper = objectMapper.readValue(responseBody, KrxApiResponseWrapper.class);
+        } catch (JsonProcessingException e) {
+            log.error("[KRX API] JSON 파싱 실패: {}", e.getMessage());
+            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR, e);
+        }
 
-            while (true) {
-                URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/getStockMarketIndex")
-                        .queryParam("serviceKey", apiKey)
-                        .queryParam("resultType", "json")
-                        .queryParam("pageNo", pageNo)
-                        .queryParam("numOfRows", numOfRows)
-                        .queryParam("beginBasDt", date.format(DateTimeFormatter.BASIC_ISO_DATE))
-                        .queryParam("endBasDt", date.plusDays(1).format(DateTimeFormatter.BASIC_ISO_DATE))
-                        .build(true)
-                        .toUri();
-                String responseBody = restTemplate.getForObject(uri, String.class);
+        validateResponse(wrapper);
 
-                if (responseBody == null || responseBody.isBlank()) {
-                    break;
-                }
+        if (wrapper.response().body() == null || wrapper.response().body().items() == null) {
+            return Collections.emptyList();
+        }
 
-                KrxApiResponseWrapper wrapper =
-                        objectMapper.readValue(responseBody, KrxApiResponseWrapper.class);
+        List<IndexDataApiResponse> items = wrapper.response().body().items().item();
+        return items == null ? Collections.emptyList() : items;
+    }
 
-                if (wrapper.response() == null
-                        || wrapper.response().body() == null
-                        || wrapper.response().body().items() == null) {
-                    break;
-                }
-
-                List<IndexDataApiResponse> pageItems =
-                        wrapper.response().body().items().item();
-
-                if (pageItems == null || pageItems.isEmpty()) {
-                    break;
-                }
-
-                allItems.addAll(pageItems);
-
-                if (pageItems.size() < numOfRows) {
-                    break;
-                }
-
-                pageNo++;
-            }
-
-            return allItems.isEmpty() ? Collections.emptyList() : allItems;
-
-        } catch (ApiException e) {
-            throw e;
-        } catch (Exception e) {
+    private void validateResponse(KrxApiResponseWrapper wrapper) {
+        if (wrapper == null || wrapper.response() == null || wrapper.response().header() == null) {
+            throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
+        }
+        if (!"00".equals(wrapper.response().header().resultCode())) {
+            log.error("[KRX API] resultCode 오류: {} - {}", wrapper.response().header().resultCode(), wrapper.response().header().resultMsg());
             throw new ApiException(ERROR.SYNC_JOB_OPEN_API_ERROR);
         }
     }
