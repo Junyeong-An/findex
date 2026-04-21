@@ -68,15 +68,12 @@ public class SyncJobCustomRepositoryImpl implements SyncJobCustomRepository {
     String nextCursor = null;
     UUID nextIdAfter = null;
 
-    if (!content.isEmpty()) {
+    if (hasNext) {
       SyncJobResponse lastElement = content.get(content.size() - 1);
       nextIdAfter = lastElement.id();
-
-      if ("targetDate".equals(activeSortField)) {
-        nextCursor = lastElement.targetDate().toString();
-      } else {
-        nextCursor = lastElement.jobTime().toString();
-      }
+      nextCursor = "targetDate".equals(activeSortField)
+          ? lastElement.targetDate().toString()
+          : lastElement.jobTime().toString();
     }
 
     return CursorPageResponse.of(

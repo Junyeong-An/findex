@@ -117,7 +117,7 @@ public class IndexInfoCustomRepositoryImpl implements IndexInfoCustomRepository 
     String cursor = condition.cursor();
     UUID idAfter = condition.idAfter();
     boolean isAsc = !"desc".equalsIgnoreCase(condition.sortDirection());
-    if (cursor == null) {
+    if (cursor == null || idAfter == null) {
       return null;
     }
     return switch (condition.sortField()) {
