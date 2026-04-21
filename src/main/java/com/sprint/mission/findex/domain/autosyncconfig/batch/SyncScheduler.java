@@ -9,6 +9,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,14 @@ public class SyncScheduler {
 
   private final KrxOpenApiClient krxOpenApiClient;
   private final SyncBatchService syncBatchService;
+
+  @PostConstruct
+  public void validateDefaultSyncDays() {
+    if (defaultSyncDays <= 0) {
+      throw new IllegalStateException(
+          "sync.default-sync-days 값이 유효하지 않습니다: " + defaultSyncDays + " (1 이상이어야 합니다)");
+    }
+  }
 
   @Scheduled(cron = "${sync.cron}", zone = "Asia/Seoul")
   public void syncIndexData() {
