@@ -40,6 +40,7 @@ public class SyncJobService {
   private final KrxOpenApiClient krxOpenApiClient;
   private final IndexDataMapper indexDataMapper;
   private final IndexInfoSyncProcessor indexInfoSyncProcessor;
+  private final IndexDataSyncProcessor indexDataSyncProcessor;
 
   public List<SyncJobResponse> syncIndexInfos(LocalDate targetDate, String workerIp) {
     List<IndexDataApiResponse> responses = krxOpenApiClient.fetchByDate(targetDate);
@@ -96,12 +97,11 @@ public class SyncJobService {
         );
 
         int dataSize = (externalDataList != null) ? externalDataList.size() : 0;
-
         LocalDate actualTargetDate = baseDateTo;
+        List<IndexData> indexDataList = null;
 
         if (dataSize > 0) {
-          List<IndexData> indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo);
-          saveData(indexDataList);
+          indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo);
 
           actualTargetDate = indexDataList.stream()
               .map(IndexData::getBaseDate)
@@ -113,7 +113,9 @@ public class SyncJobService {
             ? null
             : String.format("범위 연동: %s ~ %s (%d건)", baseDateFrom, baseDateTo, dataSize);
 
-        results.add(saveSyncJobHistory(indexInfo, JobType.INDEX_DATA, actualTargetDate, workerIp, JobResult.SUCCESS, logMessage));
+        results.add(indexDataSyncProcessor.saveIndexDataAndHistory(
+            indexDataList, indexInfo, actualTargetDate, workerIp, logMessage));
+
         log.info("[Sync 성공] 지수: {}, 요청범위: {} ~ {} -> 실제연동기준일: {} ({}건)",
             indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, dataSize);
 
@@ -140,11 +142,6 @@ public class SyncJobService {
       int size) {
 
     return syncJobRepository.searchSyncJobPage(condition, cursor, idAfter, sortField, sortDirection, size);
-  }
-
-  @Transactional
-  protected void saveData(List<IndexData> indexDataList) {
-    indexDataRepository.saveAll(indexDataList);
   }
 
   private IndexInfoCreateRequest toCreateRequest(IndexDataApiResponse response) {
