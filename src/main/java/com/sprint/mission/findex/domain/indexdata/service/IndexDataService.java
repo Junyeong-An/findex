@@ -17,7 +17,6 @@ import com.sprint.mission.findex.global.exception.ApiException.ERROR;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +33,6 @@ public class IndexDataService {
   private final IndexDataRepository indexDataRepository;
   private final IndexInfoRepository indexInfoRepository;
   private final IndexDataMapper indexDataMapper;
-
-  private static final Set<String> VALID_SORT_FIELDS = Set.of(
-      "baseDate", "marketPrice", "closingPrice", "highPrice", "lowPrice",
-      "versus", "fluctuationRate", "tradingQuantity", "tradingPrice", "marketTotalAmount"
-  );
 
   @Transactional
   public IndexDataResponse create(IndexDataCreateRequest request) {
@@ -101,17 +95,7 @@ public class IndexDataService {
 
   @Transactional(readOnly = true)
   public CursorPageResponse<IndexDataResponse> getList(IndexDataQueryCondition request) {
-    if (request.startDate() != null && request.endDate() != null
-        && request.startDate().isAfter(request.endDate())) {
-      throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
-    }
-    if ((request.cursor() == null) != (request.idAfter() == null)) {
-      throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
-    }
-    String sortField = request.sortField() != null ? request.sortField() : "baseDate";
-    if (!VALID_SORT_FIELDS.contains(sortField)) {
-      throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
-    }
+
     return indexDataRepository.findAll(request);
   }
 
