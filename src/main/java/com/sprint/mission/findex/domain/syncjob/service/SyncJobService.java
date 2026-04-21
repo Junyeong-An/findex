@@ -9,8 +9,8 @@ import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.domain.indexinfo.repository.IndexInfoRepository;
 import com.sprint.mission.findex.domain.syncclient.client.KrxOpenApiClient;
 import com.sprint.mission.findex.domain.syncclient.dto.IndexDataApiResponse;
-import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
+import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.entity.JobResult;
 import com.sprint.mission.findex.domain.syncjob.entity.JobType;
 import com.sprint.mission.findex.domain.syncjob.entity.SyncJob;
@@ -194,15 +194,10 @@ public class SyncJobService {
   }
 
   @Transactional(readOnly = true)
-  public CursorPageResponse<SyncJobResponse> getSyncJobHistory(
-      SyncJobQueryCondition condition,
-      String cursor,
-      UUID idAfter,
-      String sortField,
-      String sortDirection,
-      int size) {
-
-    return syncJobRepository.searchSyncJobPage(condition, cursor, idAfter, sortField, sortDirection, size);
+  public CursorPageResponse<SyncJobResponse> getSyncJobHistory(SyncJobQueryCondition condition) {
+    return syncJobRepository.searchSyncJobPage(
+        condition, condition.cursor(), condition.idAfter(),
+        condition.sortField(), condition.sortDirection(), condition.size());
   }
 
   private IndexInfoCreateRequest toCreateRequest(IndexDataApiResponse response) {

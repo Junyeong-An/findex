@@ -1,4 +1,4 @@
-package com.sprint.mission.findex.domain.autosyncconfig.repository;
+package com.sprint.mission.findex.domain.autosyncconfig.repository.querydsl.impl;
 
 import static com.sprint.mission.findex.domain.autosyncconfig.entity.QAutoSyncConfig.autoSyncConfig;
 
@@ -7,12 +7,13 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.repository.querydsl.AutoSyncConfigCustomRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class AutoSyncConfigRepositoryImpl implements AutoSyncConfigRepositoryCustom {
+public class AutoSyncConfigCustomRepositoryImpl implements AutoSyncConfigCustomRepository {
 
   private final JPAQueryFactory queryFactory;
 
@@ -53,7 +54,7 @@ public class AutoSyncConfigRepositoryImpl implements AutoSyncConfigRepositoryCus
   }
 
   private BooleanExpression cursorCondition(String sortField, String cursor, UUID idAfter, boolean asc) {
-    if (cursor == null || idAfter == null) {
+    if (cursor == null) {
       return null;
     }
     return switch (sortField) {

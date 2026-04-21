@@ -1,6 +1,7 @@
 package com.sprint.mission.findex.domain.autosyncconfig.repository;
 
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
+import com.sprint.mission.findex.domain.autosyncconfig.repository.querydsl.AutoSyncConfigCustomRepository;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface AutoSyncConfigRepository extends JpaRepository<AutoSyncConfig, UUID>,
-    AutoSyncConfigRepositoryCustom {
+    AutoSyncConfigCustomRepository {
 
   // M1(IndexInfoService)에서 IndexInfo 등록 시 중복 생성 방지용
   boolean existsByIndexInfo(IndexInfo indexInfo);

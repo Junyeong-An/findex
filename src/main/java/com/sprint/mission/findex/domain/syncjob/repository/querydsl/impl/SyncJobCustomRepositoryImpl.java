@@ -83,15 +83,10 @@ public class SyncJobCustomRepositoryImpl implements SyncJobCustomRepository {
     String nextCursor = null;
     UUID nextIdAfter = null;
 
-    if (!content.isEmpty()) {
+    if (hasNext) {
       SyncJobResponse lastElement = content.get(content.size() - 1);
       nextIdAfter = lastElement.id();
-
-      if ("targetDate".equals(activeSortField)) {
-        nextCursor = lastElement.targetDate().toString();
-      } else {
-        nextCursor = lastElement.jobTime().toString();
-      }
+      nextCursor = extractCursor(activeSortField, lastElement);
     }
 
     return CursorPageResponse.of(
@@ -150,6 +145,13 @@ public class SyncJobCustomRepositoryImpl implements SyncJobCustomRepository {
     OrderSpecifier<?> secondaryOrder = new OrderSpecifier<>(direction, syncJob.id);
 
     return new OrderSpecifier[]{primaryOrder, secondaryOrder};
+  }
+
+  private String extractCursor(String sortField, SyncJobResponse response) {
+    return switch (sortField) {
+      case "targetDate" -> response.targetDate().toString();
+      default -> response.jobTime().toString();
+    };
   }
 
   private BooleanExpression eqJobType(JobType jobType) { return jobType != null ? syncJob.jobType.eq(jobType) : null; }
