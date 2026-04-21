@@ -1,10 +1,10 @@
-package com.sprint.mission.findex.domain.autosyncconfig.repository;
+package com.sprint.mission.findex.domain.autosyncconfig.repository.querydsl;
 
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import java.util.List;
 import java.util.UUID;
 
-public interface AutoSyncConfigRepositoryCustom {
+public interface AutoSyncConfigCustomRepository {
 
   List<AutoSyncConfig> findAllWithCursor(
       String cursor,

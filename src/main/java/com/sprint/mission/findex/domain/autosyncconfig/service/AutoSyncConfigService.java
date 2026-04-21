@@ -10,6 +10,7 @@ import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class AutoSyncConfigService {
   private static final int MIN_PAGE_SIZE = 1;
   private static final int MAX_PAGE_SIZE = 100;
   private static final String DEFAULT_SORT_FIELD = "indexInfo.indexName";
-  private static final List<String> ALLOWED_SORT_FIELDS = List.of("indexInfo.indexName", "enabled");
+  private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("indexInfo.indexName", "enabled");
 
   private final AutoSyncConfigMapper autoSyncConfigMapper;
   private final AutoSyncConfigRepository autoSyncConfigRepository;
@@ -43,11 +44,8 @@ public class AutoSyncConfigService {
   ) {
     int size = pageRequest.size() != null ? pageRequest.size() : 10;
     int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
-    String effectiveSortField = (pageRequest.sortField() == null || pageRequest.sortField().isBlank())
-        ? DEFAULT_SORT_FIELD : pageRequest.sortField();
-    if (!ALLOWED_SORT_FIELDS.contains(effectiveSortField)) {
-      throw new ApiException(ERROR.INVALID_SORT_FIELD);
-    }
+    String effectiveSortField = ALLOWED_SORT_FIELDS.contains(pageRequest.sortField())
+        ? pageRequest.sortField() : DEFAULT_SORT_FIELD;
     boolean asc = !"desc".equalsIgnoreCase(pageRequest.sortDirection());
 
     List<AutoSyncConfig> results = autoSyncConfigRepository.findAllWithCursor(
