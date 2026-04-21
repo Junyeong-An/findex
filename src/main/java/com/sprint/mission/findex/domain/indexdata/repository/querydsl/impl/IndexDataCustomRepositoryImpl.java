@@ -7,6 +7,8 @@ import com.sprint.mission.findex.domain.indexdata.dto.IndexDataQueryCondition;
 import com.sprint.mission.findex.domain.indexdata.entity.QIndexData;
 import com.sprint.mission.findex.domain.indexdata.repository.querydsl.IndexDataCustomRepository;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
+import com.sprint.mission.findex.global.exception.ApiException;
+import com.sprint.mission.findex.global.exception.ApiException.ERROR;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -162,7 +164,7 @@ public class IndexDataCustomRepositoryImpl implements IndexDataCustomRepository 
         }
       };
     } catch (NumberFormatException | java.time.format.DateTimeParseException e) {
-      throw new IllegalArgumentException("잘못된 cursor 값입니다: " + cursor);
+      throw new ApiException(ERROR.COMMON_INVALID_REQUEST);
     }
   }
   private OrderSpecifier<?> sortOrder(String sortField, boolean asc) {

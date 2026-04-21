@@ -119,16 +119,14 @@ public class IndexDataService {
   public void exportCsv(IndexDataExportRequest request, HttpServletResponse response)
       throws IOException {
 
-    response.setContentType("text/csv");
+    response.setContentType("text/csv; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
     String filename = "index-data-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + ".csv";
-    response.setHeader("Content-Disposition", "attachment; filename=" + filename);
-
+    response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
     PrintWriter writer = response.getWriter();
+    writer.print('\uFEFF');
 
-    writer.println("id,indexInfoId,baseDate,sourceType,marketPrice,closingPrice," +
-        "highPrice,lowPrice,versus,fluctuationRate,tradingQuantity," +
-        "tradingPrice,marketTotalAmount");
+    writer.println("기준일자,지수분류,지수명,시가,종가,고가,저가,전일대비,등락률,거래량,거래대금,시가총액");
 
     try (Stream<IndexData> stream = indexDataRepository.streamForExport(
         request.indexInfoId(),
@@ -136,21 +134,35 @@ public class IndexDataService {
         request.endDate()
     )) {
       stream.forEach(data -> writer.println(String.join(",",
-          data.getId().toString(),
-          data.getIndexInfo().getId().toString(),
-          data.getBaseDate().toString(),
-          data.getSourceType().toString(),
-          data.getMarketPrice().toString(),
-          data.getClosingPrice().toString(),
-          data.getHighPrice().toString(),
-          data.getLowPrice().toString(),
-          data.getVersus().toString(),
-          data.getFluctuationRate().toString(),
-          data.getTradingQuantity().toString(),
-          data.getTradingPrice().toString(),
-          data.getMarketTotalAmount().toString()
+          csvCell(data.getBaseDate().toString()),
+          csvCell(data.getIndexInfo().getIndexClassification()),
+          csvCell(data.getIndexInfo().getIndexName()),
+          csvCell(data.getMarketPrice().toString()),
+          csvCell(data.getClosingPrice().toString()),
+          csvCell(data.getHighPrice().toString()),
+          csvCell(data.getLowPrice().toString()),
+          csvCell(data.getVersus().toString()),
+          csvCell(data.getFluctuationRate().toString()),
+          csvCell(data.getTradingQuantity().toString()),
+          csvCell(data.getTradingPrice().toString()),
+          csvCell(data.getMarketTotalAmount().toString())
       )));
     }
     writer.flush();
+  }
+
+  private static String csvCell(String raw) {
+    if (raw == null) return "";
+    String safe = raw;
+    if (!safe.isEmpty() && "=+-@".indexOf(safe.charAt(0)) >= 0) {
+      safe = "'" + safe;
+    }
+    if (safe.contains("\"")) {
+      safe = safe.replace("\"", "\"\"");
+    }
+    if (safe.contains(",") || safe.contains("\n") || safe.contains("\r") || safe.contains("\"")) {
+      return "\"" + safe + "\"";
+    }
+    return safe;
   }
 }

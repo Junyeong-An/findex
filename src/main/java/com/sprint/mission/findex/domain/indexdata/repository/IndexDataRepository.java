@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,11 +28,11 @@ public interface IndexDataRepository extends JpaRepository<IndexData, UUID>,
   Optional<IndexData> findFirstByIndexInfoIdOrderByBaseDateDesc(UUID indexInfoId);
 
   Optional<IndexData> findFirstByIndexInfoIdAndBaseDateLessThanEqualOrderByBaseDateDesc(
-          UUID indexInfoId,
-          LocalDate baseDate
+      UUID indexInfoId,
+      LocalDate baseDate
   );
 
-  @Query("SELECT d FROM IndexData d WHERE " +
+  @Query("SELECT d FROM IndexData d JOIN FETCH d.indexInfo WHERE " +
       "(:indexInfoId IS NULL OR d.indexInfo.id = :indexInfoId) AND " +
       "(:startDate IS NULL OR d.baseDate >= :startDate) AND " +
       "(:endDate IS NULL OR d.baseDate <= :endDate) " +
