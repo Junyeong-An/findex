@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,6 @@ public interface AutoSyncConfigApi {
       @Parameter(description = "활성화 여부 필터") @RequestParam(required = false) Boolean enabled,
       @Parameter(description = "정렬 필드 (indexInfo.indexName, enabled)") @RequestParam(defaultValue = "indexInfo.indexName") String sortField,
       @Parameter(description = "정렬 방향 (asc, desc)") @RequestParam(defaultValue = "asc") String sortDirection,
-      @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size
+      @Parameter(description = "페이지 크기") @Min(1) @RequestParam(defaultValue = "10") int size
   );
 }

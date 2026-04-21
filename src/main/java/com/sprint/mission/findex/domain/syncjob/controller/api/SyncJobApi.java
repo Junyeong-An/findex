@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -50,6 +51,6 @@ public interface SyncJobApi {
       @RequestParam(defaultValue = "desc") String sortDirection,
 
       @Parameter(description = "페이지 크기")
-      @RequestParam(defaultValue = "10") int size
+      @Min(1) @RequestParam(defaultValue = "10") int size
   );
 }
