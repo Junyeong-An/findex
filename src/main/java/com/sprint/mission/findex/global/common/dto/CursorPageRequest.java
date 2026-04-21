@@ -1,6 +1,7 @@
 package com.sprint.mission.findex.global.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public record CursorPageRequest(
     @Schema(description = "정렬 방향 (asc, desc)")
     String sortDirection,
 
-    @Min(1)
+    @Min(1) @Max(100)
     @Schema(description = "페이지 크기", example = "10")
     Integer size
 ) {}
