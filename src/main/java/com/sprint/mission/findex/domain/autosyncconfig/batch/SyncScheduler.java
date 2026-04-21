@@ -9,8 +9,10 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +21,21 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SyncScheduler {
 
-  private static final int DEFAULT_SYNC_DAYS = 7;
   private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
+  @Value("${sync.default-sync-days}")
+  private int defaultSyncDays;
 
   private final KrxOpenApiClient krxOpenApiClient;
   private final SyncBatchService syncBatchService;
+
+  @PostConstruct
+  public void validateDefaultSyncDays() {
+    if (defaultSyncDays <= 0) {
+      throw new IllegalStateException(
+          "sync.default-sync-days 값이 유효하지 않습니다: " + defaultSyncDays + " (1 이상이어야 합니다)");
+    }
+  }
 
   @Scheduled(cron = "${sync.cron}", zone = "Asia/Seoul")
   public void syncIndexData() {
@@ -53,7 +65,7 @@ public class SyncScheduler {
     LocalDate from = syncBatchService
         .findLastSuccessDate(indexInfo.getId())
         .map(date -> date.plusDays(1))
-        .orElse(to.minusDays(DEFAULT_SYNC_DAYS));
+        .orElse(to.minusDays(defaultSyncDays));
 
     if (from.isAfter(to)) {
       log.info("이미 최신 데이터 - indexName: {}", indexInfo.getIndexName());
