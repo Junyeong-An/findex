@@ -75,4 +75,22 @@ public record SyncJobQueryCondition(
   public boolean isJobTimeRangeValid() {
     return jobTimeFrom == null || jobTimeTo == null || !jobTimeFrom.isAfter(jobTimeTo);
   }
+
+  @AssertTrue(message = "cursor와 idAfter는 함께 전달되어야 합니다")
+  public boolean isCursorAndIdAfterConsistent() {
+    return (cursor == null) == (idAfter == null);
+  }
+
+  @AssertTrue(message = "targetDate 정렬 시 cursor는 yyyy-MM-dd 형식이어야 합니다")
+  public boolean isCursorValidForSortField() {
+    if (!"targetDate".equals(sortField) || cursor == null) {
+      return true;
+    }
+    try {
+      java.time.LocalDate.parse(cursor);
+      return true;
+    } catch (java.time.format.DateTimeParseException e) {
+      return false;
+    }
+  }
 }

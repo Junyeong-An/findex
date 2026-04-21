@@ -54,7 +54,7 @@ public class AutoSyncConfigCustomRepositoryImpl implements AutoSyncConfigCustomR
   }
 
   private BooleanExpression cursorCondition(String sortField, String cursor, UUID idAfter, boolean asc) {
-    if (cursor == null || idAfter == null) {
+    if (cursor == null) {
       return null;
     }
     return switch (sortField) {
