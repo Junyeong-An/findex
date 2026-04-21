@@ -5,6 +5,7 @@ import com.sprint.mission.findex.domain.autosyncconfig.dto.AutoSyncConfigUpdateR
 import com.sprint.mission.findex.domain.autosyncconfig.entity.AutoSyncConfig;
 import com.sprint.mission.findex.domain.autosyncconfig.mapper.AutoSyncConfigMapper;
 import com.sprint.mission.findex.domain.autosyncconfig.repository.AutoSyncConfigRepository;
+import com.sprint.mission.findex.global.common.dto.CursorPageRequest;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import com.sprint.mission.findex.global.exception.ApiException;
 import com.sprint.mission.findex.global.exception.ApiException.ERROR;
@@ -36,24 +37,22 @@ public class AutoSyncConfigService {
 
   @Transactional(readOnly = true)
   public CursorPageResponse<AutoSyncConfigResponse> findAll(
-      UUID idAfter,
-      String cursor,
       UUID indexInfoId,
       Boolean enabled,
-      String sortField,
-      String sortDirection,
-      int size
+      CursorPageRequest pageRequest
   ) {
+    int size = pageRequest.size() != null ? pageRequest.size() : 10;
     int validatedSize = Math.max(MIN_PAGE_SIZE, Math.min(size, MAX_PAGE_SIZE));
-    String effectiveSortField = (sortField == null || sortField.isBlank()) ? DEFAULT_SORT_FIELD : sortField;
+    String effectiveSortField = (pageRequest.sortField() == null || pageRequest.sortField().isBlank())
+        ? DEFAULT_SORT_FIELD : pageRequest.sortField();
     if (!ALLOWED_SORT_FIELDS.contains(effectiveSortField)) {
       throw new ApiException(ERROR.INVALID_SORT_FIELD);
     }
-    boolean asc = !"desc".equalsIgnoreCase(sortDirection);
+    boolean asc = !"desc".equalsIgnoreCase(pageRequest.sortDirection());
 
     List<AutoSyncConfig> results = autoSyncConfigRepository.findAllWithCursor(
-        cursor,
-        idAfter,
+        pageRequest.cursor(),
+        pageRequest.idAfter(),
         indexInfoId,
         enabled,
         effectiveSortField,
