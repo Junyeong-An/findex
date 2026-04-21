@@ -58,6 +58,21 @@ public class SyncJobCustomRepositoryImpl implements SyncJobCustomRepository {
         .limit(size + 1L)
         .fetch();
 
+    Long totalElements = queryFactory
+        .select(syncJob.count())
+        .from(syncJob)
+        .where(
+            eqJobType(condition.jobType()),
+            eqIndexInfoId(condition.indexInfoId()),
+            eqStatus(condition.status()),
+            goeBaseDateFrom(condition.baseDateFrom()),
+            loeBaseDateTo(condition.baseDateTo()),
+            containsWorker(condition.worker()),
+            goeJobTimeFrom(condition.jobTimeFrom()),
+            loeJobTimeTo(condition.jobTimeTo())
+        )
+        .fetchOne();
+
     boolean hasNext = syncJobs.size() > size;
 
     List<SyncJobResponse> content = syncJobs.stream()
@@ -84,7 +99,7 @@ public class SyncJobCustomRepositoryImpl implements SyncJobCustomRepository {
         nextCursor,
         nextIdAfter,
         size,
-        null,
+        totalElements,
         hasNext
     );
   }
