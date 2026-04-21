@@ -106,7 +106,19 @@ public class SyncJobService {
           results.add(indexInfoSyncProcessor.createAndSaveHistory(toCreateRequest(response), targetDate, workerIp));
           log.info("[IndexInfo Sync 성공-신규] 지수: {}", response.idxNm());
         } catch (Exception e) {
-          log.error("[IndexInfo Sync 실패-신규] 지수: {}, 사유: {}", response.idxNm(), e.getMessage());
+          String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+
+          Optional<IndexInfo> retryExisting = indexInfoRepository.findByIndexClassificationAndIndexName(
+              response.idxCsf(), response.idxNm()
+          );
+
+          if (retryExisting.isPresent()) {
+            log.error("[IndexInfo Sync 실패-신규(충돌 의심)] 지수: {}, 사유: {}", response.idxNm(), errorMsg);
+            results.add(saveSyncJobHistory(retryExisting.get(), JobType.INDEX_INFO, targetDate, workerIp, JobResult.FAILED, "신규 생성 중 예외 발생 (Unique 제약조건 충돌 의심): " + errorMsg));
+          } else {
+            log.error("[IndexInfo Sync 비정상 흐름] 워크플로우 위반 가능성 탐지 지수명: {} | 사유: {} | 조치: 해당 지수의 사전 등록 여부 및 마스터 데이터 확인 필요",
+                response.idxNm(), errorMsg);
+          }
         }
       } else {
         IndexInfo indexInfo = existing.get();
@@ -181,13 +193,19 @@ public class SyncJobService {
             indexInfo.getIndexName(), baseDateFrom, baseDateTo, actualTargetDate, indexDataList.size());
 
       } catch (Exception e) {
+        String safeErrorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+
         String errorLog = isSingleDay
-            ? e.getMessage()
-            : String.format("범위 연동 실패 (%s ~ %s): %s", baseDateFrom, baseDateTo, e.getMessage());
+            ? String.format("[단건 연동 실패] 해당 지수 외 정상 처리됨 | 사유: %s", safeErrorMsg)
+            : String.format("[범위 연동 실패] 기간: %s ~ %s | 타 데이터 영향 없음 | 사유: %s", baseDateFrom, baseDateTo, safeErrorMsg);
 
-        log.error("[Sync 실패] 지수: {}, 사유: {}", indexInfo.getIndexName(), errorLog);
+        log.error("[IndexData Sync 부분 실패] 지수: {} | {}", indexInfo.getIndexName(), errorLog);
 
-        results.add(saveSyncJobHistory(indexInfo, JobType.INDEX_DATA, baseDateTo, workerIp, JobResult.FAILED, errorLog));
+        try {
+          results.add(saveSyncJobHistory(indexInfo, JobType.INDEX_DATA, baseDateTo, workerIp, JobResult.FAILED, errorLog));
+        } catch (Exception historyEx) {
+          log.error("[IndexData Sync 실패 이력 저장 실패] 지수: {} | 사유: {}", indexInfo.getIndexName(), historyEx.getMessage());
+        }
       }
     }
     return results;
