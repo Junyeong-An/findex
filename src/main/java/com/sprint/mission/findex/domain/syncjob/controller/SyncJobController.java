@@ -2,14 +2,13 @@ package com.sprint.mission.findex.domain.syncjob.controller;
 
 import com.sprint.mission.findex.domain.syncjob.controller.api.SyncJobApi;
 import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.service.SyncJobService;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -20,12 +19,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/sync-jobs")

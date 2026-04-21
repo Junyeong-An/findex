@@ -1,20 +1,21 @@
 package com.sprint.mission.findex.domain.syncjob.controller.api;
 
 import com.sprint.mission.findex.domain.syncjob.dto.IndexDataSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.IndexInfoSyncRequest;
-import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "연동 작업 API", description = "연동 작업 관리 API")
 public interface SyncJobApi {
