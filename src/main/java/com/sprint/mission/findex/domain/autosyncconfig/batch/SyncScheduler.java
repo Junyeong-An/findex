@@ -67,8 +67,8 @@ public class SyncScheduler {
       DayOfWeek dayOfWeek = to.getDayOfWeek();
       boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
       if (isWeekend) {
-        log.info("조회된 지수 데이터 없음 (주말) - indexName: {}, from: {}, to: {}",
-            indexInfo.getIndexName(), from, to);
+        // 주말 빈 응답은 정상 - SUCCESS 기록으로 다음 실행 시 중복 조회 방지
+        syncBatchService.recordSuccess(indexInfo, to);
       } else {
         log.warn("조회된 지수 데이터 없음 (평일) - 지수명이 올바르지 않거나 공휴일일 수 있음 - indexName: {}, from: {}, to: {}",
             indexInfo.getIndexName(), from, to);
