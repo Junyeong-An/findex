@@ -11,6 +11,7 @@ import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +20,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SyncScheduler {
 
-  private static final int DEFAULT_SYNC_DAYS = 7;
   private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
+  @Value("${sync.default-sync-days}")
+  private int defaultSyncDays;
 
   private final KrxOpenApiClient krxOpenApiClient;
   private final SyncBatchService syncBatchService;
@@ -53,7 +56,7 @@ public class SyncScheduler {
     LocalDate from = syncBatchService
         .findLastSuccessDate(indexInfo.getId())
         .map(date -> date.plusDays(1))
-        .orElse(to.minusDays(DEFAULT_SYNC_DAYS));
+        .orElse(to.minusDays(defaultSyncDays));
 
     if (from.isAfter(to)) {
       log.info("이미 최신 데이터 - indexName: {}", indexInfo.getIndexName());
