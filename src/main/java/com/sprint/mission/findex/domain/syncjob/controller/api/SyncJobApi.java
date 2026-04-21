@@ -5,7 +5,6 @@ import com.sprint.mission.findex.domain.syncjob.dto.SyncJobQueryCondition;
 import com.sprint.mission.findex.domain.syncjob.dto.SyncJobResponse;
 import com.sprint.mission.findex.global.common.dto.CursorPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
