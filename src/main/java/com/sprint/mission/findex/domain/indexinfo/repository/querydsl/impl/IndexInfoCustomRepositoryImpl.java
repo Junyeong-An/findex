@@ -69,8 +69,8 @@ public class IndexInfoCustomRepositoryImpl implements IndexInfoCustomRepository 
         .limit(condition.size() + 1)
         .fetch();
 
-    long totalElements = Optional.ofNullable(
-        queryFactory
+    Long totalElements = (condition.cursor() == null)
+        ? queryFactory
             .select(indexInfo.count())
             .from(indexInfo)
             .where(
@@ -79,7 +79,7 @@ public class IndexInfoCustomRepositoryImpl implements IndexInfoCustomRepository 
                 eqFavorite(condition.favorite())
             )
             .fetchOne()
-    ).orElse(0L);
+        : null;
 
     boolean hasNext = content.size() > condition.size();
     String nextCursor = null;

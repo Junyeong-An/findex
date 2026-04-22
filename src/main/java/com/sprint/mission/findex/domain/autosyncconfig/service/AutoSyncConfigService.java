@@ -67,8 +67,9 @@ public class AutoSyncConfigService {
       nextCursor = extractCursor(last, effectiveSortField);
     }
 
-    long totalElements = autoSyncConfigRepository.countWithFilter(
-        condition.indexInfoId(), condition.enabled());
+    Long totalElements = (condition.cursor() == null)
+        ? autoSyncConfigRepository.countWithFilter(condition.indexInfoId(), condition.enabled())
+        : null;
 
     return CursorPageResponse.of(
         content,

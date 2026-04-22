@@ -72,15 +72,17 @@ public class IndexDataCustomRepositoryImpl implements IndexDataCustomRepository 
     String nextCursor = hasNext ? extractCursor(sortField, result.get(result.size() - 1)) : null;
     UUID nextIdAfter = hasNext ? result.get(result.size() - 1).id() : null;
 
-    Long totalElements = queryFactory
-        .select(indexData.count())
-        .from(indexData)
-        .where(
-            eqIndexInfoId(request.indexInfoId()),
-            goeStartDate(request.startDate()),
-            loeEndDate(request.endDate())
-        )
-        .fetchOne();
+    Long totalElements = (request.cursor() == null)
+        ? queryFactory
+            .select(indexData.count())
+            .from(indexData)
+            .where(
+                eqIndexInfoId(request.indexInfoId()),
+                goeStartDate(request.startDate()),
+                loeEndDate(request.endDate())
+            )
+            .fetchOne()
+        : null;
 
     return CursorPageResponse.of(result, nextCursor, nextIdAfter, size, totalElements, hasNext);
   }
