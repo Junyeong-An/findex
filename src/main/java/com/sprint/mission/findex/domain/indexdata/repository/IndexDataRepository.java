@@ -23,6 +23,8 @@ public interface IndexDataRepository extends JpaRepository<IndexData, UUID>,
 
   List<IndexData> findByIndexInfoIdAndBaseDateBetween(UUID indexInfoId, LocalDate from, LocalDate to);
 
+  List<IndexData> findByIndexInfoIdAndBaseDateBetweenOrderByBaseDateAsc(UUID indexInfoId, LocalDate from, LocalDate to);
+
   List<IndexData> findByBaseDateBetween(LocalDate from, LocalDate to);
 
   Optional<IndexData> findFirstByIndexInfoIdOrderByBaseDateDesc(UUID indexInfoId);

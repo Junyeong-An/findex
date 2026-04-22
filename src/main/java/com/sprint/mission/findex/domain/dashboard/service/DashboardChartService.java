@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +38,7 @@ public class DashboardChartService {
     LocalDate fromDate = getFromDate(periodType);
 
     List<IndexData> sortedIndexData = indexDataRepository
-        .findByIndexInfoIdAndBaseDateBetween(id, fromDate, LocalDate.now())
-        .stream()
-        .sorted(Comparator.comparing(IndexData::getBaseDate))
-        .toList();
+        .findByIndexInfoIdAndBaseDateBetweenOrderByBaseDateAsc(id, fromDate, LocalDate.now());
 
     List<ChartDataPoint> dataPoints = toChartDataPoints(sortedIndexData);
     List<ChartDataPoint> ma5DataPoints = calculateMovingAverage(sortedIndexData, 5);
