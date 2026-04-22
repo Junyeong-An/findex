@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -52,6 +53,11 @@ public class KrxOpenApiClientImpl implements KrxOpenApiClient {
         this.objectMapper = objectMapper;
     }
 
+    @Cacheable(
+        value = "krxDailyData",
+        key = "#indexName + ':' + #from + ':' + #to",
+        condition = "#to != null && #from != null && #to.isBefore(T(java.time.LocalDate).now(T(java.time.ZoneId).of('Asia/Seoul')))"
+    )
     @Override
     public List<IndexDataApiResponse> fetchByDateRange(String indexName, LocalDate from, LocalDate to) {
         if (from == null || to == null || from.isAfter(to)) {
