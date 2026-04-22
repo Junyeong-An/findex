@@ -46,7 +46,7 @@ public class IndexDataController implements IndexDataApi {
     return ResponseEntity.ok(indexDataService.update(id, request));
   }
 
-  @DeleteMapping("{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable UUID id) {
     indexDataService.delete(id);
     return ResponseEntity.noContent().build();
