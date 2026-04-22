@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -165,23 +166,29 @@ public class SyncJobService {
 
         LocalDate actualTargetDate = baseDateTo;
 
-        Set<LocalDate> existingDates = indexDataRepository
+        Set<LocalDate> seenDates = indexDataRepository
             .findByIndexInfoIdAndBaseDateBetween(indexInfo.getId(), baseDateFrom, baseDateTo)
             .stream()
             .map(IndexData::getBaseDate)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(HashSet::new));
 
-        List<IndexData> indexDataList = indexDataMapper.toEntityList(externalDataList, indexInfo)
-            .stream()
-            .filter(d -> !existingDates.contains(d.getBaseDate()))
-            .collect(Collectors.toList());
-
-        if (!indexDataList.isEmpty()) {
-          actualTargetDate = indexDataList.stream()
-              .map(IndexData::getBaseDate)
-              .max(LocalDate::compareTo)
-              .orElse(baseDateTo);
+        List<IndexData> indexDataList = new ArrayList<>();
+        for (IndexData d : indexDataMapper.toEntityList(externalDataList, indexInfo)) {
+          if (seenDates.add(d.getBaseDate())) {
+            indexDataList.add(d);
+          }
         }
+
+        if (indexDataList.isEmpty()) {
+          log.info("[Sync 스킵] 지수: {}, 요청범위: {} ~ {} -> 모든 날짜 이미 존재",
+              indexInfo.getIndexName(), baseDateFrom, baseDateTo);
+          continue;
+        }
+
+        actualTargetDate = indexDataList.stream()
+            .map(IndexData::getBaseDate)
+            .max(LocalDate::compareTo)
+            .orElse(baseDateTo);
 
         String logMessage = isSingleDay
             ? null
