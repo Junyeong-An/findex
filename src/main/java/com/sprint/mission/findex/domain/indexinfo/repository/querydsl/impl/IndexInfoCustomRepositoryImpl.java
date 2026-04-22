@@ -37,6 +37,7 @@ public class IndexInfoCustomRepositoryImpl implements IndexInfoCustomRepository 
             indexInfo.indexName
         ))
         .from(indexInfo)
+        .orderBy(indexInfo.indexName.asc(), indexInfo.id.asc())
         .fetch();
   }
 
