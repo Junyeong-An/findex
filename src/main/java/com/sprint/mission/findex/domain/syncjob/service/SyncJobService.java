@@ -134,7 +134,7 @@ public class SyncJobService {
     }
     return results;
   }
-  public List<SyncJobResponse> syncIndexData(List<UUID> indexInfoIds, LocalDate baseDateFrom, LocalDate baseDateTo, String workerIp) {
+  public List<SyncJobResponse> syncIndexData(List<String> indexInfoIds, LocalDate baseDateFrom, LocalDate baseDateTo, String workerIp) {
 
     if (baseDateFrom.isAfter(baseDateTo)) {
       throw new ApiException(ApiException.ERROR.COMMON_INVALID_REQUEST);
@@ -143,7 +143,14 @@ public class SyncJobService {
     boolean isSingleDay = baseDateFrom.isEqual(baseDateTo);
     List<SyncJobResponse> results = new ArrayList<>();
 
-    for (UUID indexInfoId : indexInfoIds) {
+    List<UUID> resolvedIds;
+    if (indexInfoIds.size() == 1 && "-1".equals(indexInfoIds.get(0))) {
+      resolvedIds = indexInfoRepository.findAll().stream().map(IndexInfo::getId).toList();
+    } else {
+      resolvedIds = indexInfoIds.stream().map(UUID::fromString).toList();
+    }
+
+    for (UUID indexInfoId : resolvedIds) {
 
       IndexInfo indexInfo = indexInfoRepository.findById(indexInfoId).orElse(null);
       if (indexInfo == null) {
