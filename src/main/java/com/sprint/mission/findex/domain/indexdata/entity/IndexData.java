@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -19,13 +20,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
     name = "index_data",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"index_info_id", "base_date"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"index_info_id", "base_date"}),
+    indexes = @Index(name = "idx_index_data_lookup", columnList = "index_info_id, base_date DESC")
 )
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class IndexData extends BaseUpdatableEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)

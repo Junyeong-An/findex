@@ -12,6 +12,10 @@ CREATE TABLE IF NOT EXISTS index_info (
     UNIQUE (index_classification, index_name)
 );
 
+-- IndexInfo: 즐겨찾기 필터링 최적화 (H2는 Partial Index 미지원으로 일반 인덱스 사용)
+CREATE INDEX IF NOT EXISTS idx_index_info_favorite_true
+    ON index_info (favorite);
+
 CREATE TABLE IF NOT EXISTS index_data (
     id                  UUID        DEFAULT RANDOM_UUID() PRIMARY KEY,
     created_at          TIMESTAMP   NOT NULL,
@@ -32,6 +36,10 @@ CREATE TABLE IF NOT EXISTS index_data (
     FOREIGN KEY (index_info_id) REFERENCES index_info (id) ON DELETE CASCADE
 );
 
+-- IndexData: 시계열 내림차순 조회 및 정렬 최적화
+CREATE INDEX IF NOT EXISTS idx_index_data_lookup
+    ON index_data (index_info_id, base_date DESC);
+
 CREATE TABLE IF NOT EXISTS sync_job (
     id            UUID         DEFAULT RANDOM_UUID() PRIMARY KEY,
     created_at    TIMESTAMP    NOT NULL,
@@ -44,6 +52,11 @@ CREATE TABLE IF NOT EXISTS sync_job (
     error_message TEXT,
     FOREIGN KEY (index_info_id) REFERENCES index_info (id) ON DELETE CASCADE
 );
+
+-- SyncJob: 최신 작업 성공 이력 조회 최적화 (H2는 Partial Index 미지원으로 일반 인덱스 사용)
+CREATE INDEX IF NOT EXISTS idx_sync_job_last_success
+    ON sync_job (index_info_id, job_type, target_date DESC);
+
 
 CREATE TABLE IF NOT EXISTS auto_sync_config (
     id            UUID      DEFAULT RANDOM_UUID() PRIMARY KEY,

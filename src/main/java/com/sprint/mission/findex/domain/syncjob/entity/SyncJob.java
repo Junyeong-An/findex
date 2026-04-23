@@ -2,19 +2,30 @@ package com.sprint.mission.findex.domain.syncjob.entity;
 
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.global.common.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-import java.time.LocalDate;
-
-@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "sync_job")
+@Entity
+@Table(
+    name = "sync_job",
+    // PostgreSQL에서는 부분 인덱스로 생성: WHERE (result = 'SUCCESS')
+    indexes = @Index(name = "idx_sync_job_last_success", columnList = "index_info_id, job_type, target_date DESC")
+)
 public class SyncJob extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

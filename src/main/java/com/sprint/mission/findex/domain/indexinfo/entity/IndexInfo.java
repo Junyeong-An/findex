@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
@@ -13,12 +14,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "index_info", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"index_classification", "index_name"})
-})
+@Table(
+    name = "index_info",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"index_classification", "index_name"}),
+    indexes = @Index(name = "idx_index_info_favorite_true", columnList = "favorite")
+)
 public class IndexInfo extends BaseUpdatableEntity {
 
   @Column(name = "index_classification", nullable = false, length = 240)
