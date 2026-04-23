@@ -5,6 +5,7 @@ import com.sprint.mission.findex.domain.indexdata.entity.IndexData;
 import com.sprint.mission.findex.domain.indexinfo.entity.IndexInfo;
 import com.sprint.mission.findex.domain.syncclient.dto.IndexDataApiResponse;
 import java.util.List;
+import java.util.Objects;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -32,6 +33,7 @@ public interface IndexDataMapper {
   default List<IndexData> toEntityList(List<IndexDataApiResponse> dtoList, IndexInfo indexInfo) {
     if (dtoList == null) return null;
     return dtoList.stream()
+        .filter(res -> Objects.equals(res.idxCsf(), indexInfo.getIndexClassification()))
         .map(dto -> toEntity(dto, indexInfo))
         .toList();
   }
