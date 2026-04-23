@@ -106,6 +106,9 @@ public class SyncJobService {
         try {
           results.add(indexInfoSyncProcessor.createAndSaveHistory(toCreateRequest(response), targetDate, workerIp));
           log.info("[IndexInfo Sync 성공-신규] 지수: {}", response.idxNm());
+          final LocalDate finalTargetDate = targetDate;
+          indexInfoRepository.findByIndexClassificationAndIndexName(response.idxCsf(), response.idxNm())
+              .ifPresent(indexInfo -> trySaveIndexData(response, indexInfo, finalTargetDate, workerIp));
         } catch (Exception e) {
           String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
 
@@ -126,6 +129,7 @@ public class SyncJobService {
         try {
           results.add(indexInfoSyncProcessor.updateAndSaveHistory(indexInfo, toUpdateRequest(response), targetDate, workerIp));
           log.info("[IndexInfo Sync 성공-갱신] 지수: {}", response.idxNm());
+          trySaveIndexData(response, indexInfo, targetDate, workerIp);
         } catch (Exception e) {
           log.error("[IndexInfo Sync 실패-갱신] 지수: {}, 사유: {}", response.idxNm(), e.getMessage());
           results.add(saveSyncJobHistory(indexInfo, JobType.INDEX_INFO, targetDate, workerIp, JobResult.FAILED, e.getMessage()));
@@ -230,6 +234,23 @@ public class SyncJobService {
     return syncJobRepository.searchSyncJobPage(
         condition, condition.cursor(), condition.idAfter(),
         condition.sortField(), condition.sortDirection(), condition.size());
+  }
+
+  private void trySaveIndexData(IndexDataApiResponse response, IndexInfo indexInfo, LocalDate targetDate, String workerIp) {
+    try {
+      LocalDate responseDate = LocalDate.parse(response.basDt(), DateTimeFormatter.BASIC_ISO_DATE);
+      if (!responseDate.isEqual(targetDate)) {
+        log.warn("[IndexData Sync 스킵] 지수: {}, 날짜 불일치: 요청={}, 응답={}", indexInfo.getIndexName(), targetDate, responseDate);
+        return;
+      }
+      if (!indexDataRepository.existsByIndexInfoAndBaseDate(indexInfo, targetDate)) {
+        IndexData indexData = indexDataMapper.toEntity(response, indexInfo);
+        indexDataSyncProcessor.saveIndexDataAndHistory(List.of(indexData), indexInfo, targetDate, workerIp, null);
+      }
+    } catch (Exception e) {
+      String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+      log.warn("[IndexData Sync 실패] 지수: {}, 날짜: {}, 사유: {}", indexInfo.getIndexName(), targetDate, errorMsg);
+    }
   }
 
   private IndexInfoCreateRequest toCreateRequest(IndexDataApiResponse response) {
