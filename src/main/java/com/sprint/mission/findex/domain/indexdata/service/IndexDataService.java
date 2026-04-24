@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 @Service
 @RequiredArgsConstructor
@@ -103,42 +106,57 @@ public class IndexDataService {
   public void exportCsv(IndexDataExportRequest request, HttpServletResponse response)
       throws IOException {
 
-    response.setContentType("text/csv; charset=UTF-8");
-    response.setCharacterEncoding("UTF-8");
-    String filename = "index-data-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + ".csv";
-    response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-    PrintWriter writer = response.getWriter();
-    writer.print('\uFEFF');
-
-    writer.println("기준일자,지수분류,지수명,시가,종가,고가,저가,전일대비,등락률,거래량,거래대금,시가총액");
-
     try (Stream<IndexData> stream = indexDataRepository.streamForExport(
         request.indexInfoId(),
         request.startDate(),
         request.endDate()
     )) {
-      stream.forEach(data -> writer.println(String.join(",",
-          csvCell(data.getBaseDate().toString()),
-          csvCell(data.getIndexInfo().getIndexClassification()),
-          csvCell(data.getIndexInfo().getIndexName()),
-          csvCell(data.getMarketPrice().toString()),
-          csvCell(data.getClosingPrice().toString()),
-          csvCell(data.getHighPrice().toString()),
-          csvCell(data.getLowPrice().toString()),
-          csvCell(data.getVersus().toString()),
-          csvCell(data.getFluctuationRate().toString()),
-          csvCell(data.getTradingQuantity().toString()),
-          csvCell(data.getTradingPrice().toString()),
-          csvCell(data.getMarketTotalAmount().toString())
-      )));
-    }
-    writer.flush();
-  }
+      Iterator<IndexData> iterator = stream.iterator();
 
+      // 데이터 없으면 response 설정 전에 예외 던지기
+      if (!iterator.hasNext()) {
+        throw new ApiException(ERROR.INDEX_DATA_NOT_FOUND);
+      }
+
+      // 데이터 있을 때만 response 설정
+      response.setContentType("text/csv; charset=UTF-8");
+      response.setCharacterEncoding("UTF-8");
+      String filename = "index-data-" + LocalDateTime.now()
+          .format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + ".csv";
+      response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+      PrintWriter writer = new PrintWriter(
+          new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)
+      );
+      writer.print('\uFEFF');
+      writer.println("기준일자,지수분류,지수명,시가,종가,고가,저가,전일대비,등락률,거래량,거래대금,시가총액");
+
+      try {
+        iterator.forEachRemaining(data -> writer.println(String.join(",",
+            csvCell(data.getBaseDate().toString()),
+            csvCell(data.getIndexInfo().getIndexClassification()),
+            csvCell(data.getIndexInfo().getIndexName()),
+            csvCell(data.getMarketPrice().toString()),
+            csvCell(data.getClosingPrice().toString()),
+            csvCell(data.getHighPrice().toString()),
+            csvCell(data.getLowPrice().toString()),
+            csvCell(data.getVersus().toString()),
+            csvCell(data.getFluctuationRate().toString()),
+            csvCell(data.getTradingQuantity().toString()),
+            csvCell(data.getTradingPrice().toString()),
+            csvCell(data.getMarketTotalAmount().toString())
+        )));
+      } catch (Exception e) {
+        throw new ApiException(ERROR.INDEX_DATA_CSV_EXPORT_FAILED);
+      } finally {
+        writer.flush();
+      }
+    }
+  }
   private static String csvCell(String raw) {
     if (raw == null) return "";
     String safe = raw;
-    if (!safe.isEmpty() && "=+-@".indexOf(safe.charAt(0)) >= 0) {
+    if (!safe.isEmpty() && "=+@".indexOf(safe.charAt(0)) >= 0) {
       safe = "'" + safe;
     }
     if (safe.contains("\"")) {
